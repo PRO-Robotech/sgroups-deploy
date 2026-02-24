@@ -78,12 +78,12 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
       volumes:
-        - name: apiserver-tls
+        - name: certificates
           secret:
             secretName: {{ include "sgroups-k8s-api.fullname" . }}
-        - configMap:
+        - name: config
+          configMap:
             name: "{{ include "sgroups-k8s-api.fullname" . }}-config"
-          name: config
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

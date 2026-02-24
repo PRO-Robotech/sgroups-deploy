@@ -11,7 +11,7 @@ spec:
   project: default
   source:
     repoURL: registry-1.docker.io/prorobotech
-    targetRevision: 0.0.1-d0b80c2
+    targetRevision: 0.0.1-3dfb8d5
     chart: sgroups-chart
     helm:
       releaseName: sgroups
@@ -53,7 +53,7 @@ spec:
   project: default
   source:
     repoURL: registry-1.docker.io/prorobotech
-    targetRevision: 0.0.1-d0b80c2
+    targetRevision: 0.0.1-3dfb8d5
     chart: sgroups-k8s-api-chart
     helm:
       releaseName: sgroups-k8s-api
