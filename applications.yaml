@@ -9,12 +9,12 @@ spec:
     namespace: incloud-sgroups
     server: https://kubernetes.default.svc
   project: default
-source:
-  repoURL: registry-1.docker.io/prorobotech
-  targetRevision: 0.0.1-2360018
-  chart: sgroups-chart
-  helm:
-    releaseName: sgroups
+  source:
+    repoURL: registry-1.docker.io/prorobotech
+    targetRevision: 0.0.1-2360018
+    chart: sgroups-chart
+    helm:
+      releaseName: sgroups
   syncPolicy:
     automated:
       prune: true
@@ -34,15 +34,15 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-  repoURL: registry-1.docker.io/prorobotech
-  targetRevision: 0.0.1-2360018
-  chart: sgroups-k8s-api-chart
-  helm:
-    releaseName: sgroups-k8s-api
-    valuesObject:
-      config:
-        grpc:
-          address: "sgroups.incloud-sgroups.svc:9006"
+    repoURL: registry-1.docker.io/prorobotech
+    targetRevision: 0.0.1-2360018
+    chart: sgroups-k8s-api-chart
+    helm:
+      releaseName: sgroups-k8s-api
+      valuesObject:
+        config:
+          grpc:
+            address: "sgroups.incloud-sgroups.svc:9006"
   syncPolicy:
     automated:
       prune: true
