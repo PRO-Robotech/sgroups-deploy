@@ -68,8 +68,9 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - mountPath: /etc/sgroups/config
-              name: backend-config
+            - mountPath: /etc/sgroups/config/config.yaml
+              subPath: config.yaml
+              name: config
               readOnly: true
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -93,7 +94,7 @@ spec:
                 name: {{ include "sgroups.fullname" . }}-database
       {{- end }}
       volumes:
-        - name: backend-config
+        - name: config
           configMap:
             name: {{ include "sgroups.fullname" . }}-config
       {{- with .Values.volumes }}

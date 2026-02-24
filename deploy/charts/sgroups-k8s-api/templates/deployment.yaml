@@ -70,7 +70,8 @@ spec:
             - mountPath: /etc/sgroups/tls
               name: certificates
               readOnly: true
-            - mountPath: /etc/sgroups/config
+            - mountPath: /etc/sgroups/config/config.yaml
+              subPath: config.yaml
               name: config
               readOnly: true
           {{- with .Values.volumeMounts }}
@@ -79,7 +80,7 @@ spec:
       volumes:
         - name: apiserver-tls
           secret:
-            secretName: sgroups-apiserver-tls #TODO
+            secretName: {{ include "sgroups-k8s-api.fullname" . }}
         - configMap:
             name: "{{ include "sgroups-k8s-api.fullname" . }}-config"
           name: config
