@@ -177,6 +177,7 @@ test:
 			--folder "Selectors" \
 			--folder "Error Handling" \
 			--folder "Immutability" \
+			--folder "Watch" \
 			--folder "Cleanup" \
 			--delay-request 100 \
 			--reporters cli; \
@@ -193,6 +194,7 @@ test:
 			--folder "Selectors" \
 			--folder "Error Handling" \
 			--folder "Immutability" \
+			--folder "Watch" \
 			--folder "Cleanup" \
 			--delay-request 100 \
 			--reporters cli; \
