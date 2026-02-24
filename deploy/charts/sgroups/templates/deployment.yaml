@@ -84,7 +84,7 @@ spec:
           image: "{{ .Values.migrations.image.repository }}:{{ .Values.migrations.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.migrations.image.pullPolicy }}
           command:
-            - goose
+            - /app/bin/goose
             - -table=sg_db_ver
             - -dir
             - /migrations
