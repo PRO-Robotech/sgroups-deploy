@@ -1,0 +1,51 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "sgroups-k8s-api.fullname" . }}
+  labels:
+    {{- include "sgroups-k8s-api.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - sgroups.io
+    resources:
+      - tenants
+      - addressgroups
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - validatingwebhookconfigurations
+      - mutatingwebhookconfigurations
+      - validatingadmissionpolicies
+      - validatingadmissionpolicybindings
+      - mutatingadmissionpolicies
+      - mutatingadmissionpolicybindings
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - flowcontrol.apiserver.k8s.io
+    resources:
+      - flowschemas
+      - prioritylevelconfigurations
+    verbs:
+      - get
+      - list
+      - watch

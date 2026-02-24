@@ -1,0 +1,20 @@
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1alpha1.sgroups.io
+  annotations:
+    cert-manager.io/inject-ca-from: "{{ .Release.Namespace }}/{{ include "sgroups-k8s-api.fullname" . }}"
+  labels:
+    {{- include "sgroups-k8s-api.labels" . | nindent 4 }}
+spec:
+  caBundle: ""
+  group: sgroups.io
+  groupPriorityMinimum: 1000
+  insecureSkipTLSVerify: false
+  service:
+    name: {{ include "sgroups-k8s-api.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+    port: {{ .Values.service.port }}
+  version: v1alpha1
+  versionPriority: 15
