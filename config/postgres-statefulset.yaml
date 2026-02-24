@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sgroups-postgres
+  namespace: sgroups-system
+type: Opaque
+stringData:
+  POSTGRES_USER: user_admin
+  POSTGRES_PASSWORD: qwerty
+  POSTGRES_DB: sgroups
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sgroups-postgres
+  namespace: sgroups-system
+spec:
+  clusterIP: None
+  selector:
+    app: sgroups-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sgroups-postgres
+  namespace: sgroups-system
+spec:
+  serviceName: sgroups-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sgroups-postgres
+  template:
+    metadata:
+      labels:
+        app: sgroups-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - name: postgres
+              containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: sgroups-postgres
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - user_admin
+                - -d
+                - sgroups
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - user_admin
+                - -d
+                - sgroups
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sgroups-migration
+  namespace: sgroups-system
+spec:
+  backoffLimit: 5
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-postgres
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h sgroups-postgres.sgroups-system.svc -U user_admin -d sgroups; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+      containers:
+        - name: goose
+          image: sgroups-migration:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - goose
+            - -table=sg_db_ver
+            - -dir
+            - /migrations
+            - postgres
+            - "postgres://user_admin:qwerty@sgroups-postgres.sgroups-system.svc:5432/sgroups?sslmode=disable"
+            - up

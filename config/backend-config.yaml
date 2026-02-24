@@ -1,0 +1,19 @@
+logger:
+  level: INFO
+metrics:
+  enable: true
+healthcheck:
+  enable: true
+server:
+  endpoint: tcp://0.0.0.0:9006
+  graceful-shutdown: 10s
+  use-proto-validator: false
+  #additional-api-paths:
+  #  - hbf.v2.sgroups.SecGroupService
+  # api-path-prefix: "apis/sgroups.io/v1"
+storage:
+  type: postgres
+  postgres:
+    url: postgres://user_admin:qwerty@sgroups-postgres.sgroups-system.svc:5432/sgroups?sslmode=disable
+authn:
+  type: none
