@@ -40,8 +40,8 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          # command:
-          #   - /sgroups
+          command:
+            - /app/bin/sg-server
           args:
             - --config=/etc/sgroups/config/config.yaml
           envFrom:
@@ -88,7 +88,7 @@ spec:
             - sh
             - -c
             - |
-                /app/bin/goose -table=sg_db_ver -dir /app postgres $(DATABASE_CONNECTION_URL) up
+                /app/bin/goose -table=sg_db_ver -dir /app postgres $(SG_STORAGE_POSTGRES_URL) up
           envFrom:
             - secretRef:
                 name: {{ include "sgroups.fullname" . }}-database
