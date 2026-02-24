@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "sgroups-k8s-api.labels" . | nindent 8 }}
+        {{- include "sgroups.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -27,7 +27,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "sgroups-k8s-api.serviceAccountName" . }}
+      serviceAccountName: {{ include "sgroups.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -41,7 +41,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           # command:
-          #   - /sgroups-k8s-apiserver
+          #   - /sgroups
           args:
             - --config=/etc/sgroups/config/config.yaml
           envFrom:
@@ -74,15 +74,15 @@ spec:
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- if .Values.migration.enabled }}
+      {{- if .Values.migrations.enabled }}
       initContainers:
         - name: migrations
-          {{- with .Values.migration.securityContext }}
+          {{- with .Values.migrations.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.migration.image.repository }}:{{ .Values.migration.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.migration.image.pullPolicy }}
+          image: "{{ .Values.migrations.image.repository }}:{{ .Values.migrations.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.migrations.image.pullPolicy }}
           command:
             - goose
             - -table=sg_db_ver

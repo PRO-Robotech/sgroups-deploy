@@ -147,3 +147,7 @@ postgresql:
   global:
     security:
       allowInsecureImages: true
+  auth:
+    database: sgroups
+    username: sgroups
+    password: sgroups
