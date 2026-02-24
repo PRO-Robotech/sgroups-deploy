@@ -11,11 +11,13 @@ spec:
   project: default
   source:
     repoURL: registry-1.docker.io/prorobotech
-    targetRevision: 0.0.1-2360018
+    targetRevision: 0.0.1-eb88d40
     chart: sgroups-chart
     helm:
       releaseName: sgroups
       valuesObject:
+        externalDatabase:
+          enabled: false
         postgresql:
           enabled: true
           primary:
@@ -52,7 +54,7 @@ spec:
   project: default
   source:
     repoURL: registry-1.docker.io/prorobotech
-    targetRevision: 0.0.1-2360018
+    targetRevision: 0.0.1-eb88d40
     chart: sgroups-k8s-api-chart
     helm:
       releaseName: sgroups-k8s-api

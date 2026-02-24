@@ -84,13 +84,10 @@ spec:
           image: "{{ .Values.migrations.image.repository }}:{{ .Values.migrations.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.migrations.image.pullPolicy }}
           command:
-            - /app/bin/goose
-            - -table=sg_db_ver
-            - -dir
-            - /migrations
-            - postgres
-            - $(DATABASE_CONNECTION_URL)
-            - up
+            - sh
+            - -c
+            - |
+                /app/bin/goose -table=sg_db_ver -dir /app postgres $(DATABASE_CONNECTION_URL) up
           envFrom:
             - secretRef:
                 name: {{ include "sgroups.fullname" . }}-database
