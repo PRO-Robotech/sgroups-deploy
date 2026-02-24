@@ -15,6 +15,9 @@ spec:
     chart: sgroups-chart
     helm:
       releaseName: sgroups
+      valuesObject:
+        postgresql:
+          enabled: true
   syncPolicy:
     automated:
       prune: true
