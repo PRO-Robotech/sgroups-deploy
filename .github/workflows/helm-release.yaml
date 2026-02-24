@@ -49,7 +49,7 @@ jobs:
             -u prorobotech \
             -p ${{ secrets.DOCKERHUB_TOKEN }}
 
-          pkg=$(helm package "./deploy/charts/sgroups/Chart.yaml" | awk '{print $NF}')
+          pkg=$(helm package "./deploy/charts/sgroups" | awk '{print $NF}')
           helm push "$pkg" oci://registry-1.docker.io/prorobotech
 
       - name: Package & Push - sgroups-k8s-api
@@ -58,5 +58,5 @@ jobs:
             -u prorobotech \
             -p ${{ secrets.DOCKERHUB_TOKEN }}
 
-          pkg=$(helm package "./deploy/charts/sgroups-k8s-api/Chart.yaml" | awk '{print $NF}')
+          pkg=$(helm package "./deploy/charts/sgroups-k8s-api" | awk '{print $NF}')
           helm push "$pkg" oci://registry-1.docker.io/prorobotech
