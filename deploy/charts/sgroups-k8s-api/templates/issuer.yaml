@@ -1,0 +1,46 @@
+{{- $intTLS    := .Values.internalTLS -}}
+
+{{- if eq $intTLS.certSource "certmanager" }}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "sgroups-k8s-api.labels" . }}-selfsigned
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "k8s-role-graph.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "sgroups-k8s-api.labels" . }}-ca
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "k8s-role-graph.labels" . | nindent 4 }}
+spec:
+  commonName: {{ include "sgroups-k8s-api.labels" . }}-ca
+  isCA: true
+  issuerRef:
+    group: cert-manager.io
+    kind: Issuer
+    name: {{ include "sgroups-k8s-api.labels" . }}-selfsigned
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  secretName: {{ include "sgroups-k8s-api.labels" . }}-ca-secret
+
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "sgroups-k8s-api.labels" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "k8s-role-graph.labels" . | nindent 4 }}
+spec:
+  ca:
+    secretName: {{ include "sgroups-k8s-api.labels" . }}-ca-secret
+{{- end }}

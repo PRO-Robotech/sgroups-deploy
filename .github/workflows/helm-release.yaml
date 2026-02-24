@@ -1,0 +1,62 @@
+name: release-helm-chart
+on:
+  push:
+    branches:
+      - 'release/*'
+      - 'feature/*'
+      - 'hotfix/*'
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+rc[0-9]+'
+
+env:
+  REGISTRY: registry-1.docker.io
+  OWNER: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set chart version
+        shell: bash
+        run: |
+          BRANCH="${GITHUB_REF_NAME}"
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+
+          if [[ "$BRANCH" == feature/* ]]; then
+            NAME="${BRANCH#feature/}"
+            VERSION="0.0.0-feature-${NAME}-${SHORT_SHA}"
+          elif [[ "$BRANCH" == release/* ]]; then
+            NAME="${BRANCH#release/}"
+            VERSION="${NAME}-${SHORT_SHA}"
+          else
+            echo "Unsupported branch: $BRANCH"
+            exit 1
+          fi
+
+          echo "Using chart version sgroups: $VERSION"
+          yq -i ".version = \"${VERSION}\"" ./deploy/charts/sgroups/Chart.yaml
+
+          echo "Using chart version sgroups-k8s-api: $VERSION"
+          yq -i ".version = \"${VERSION}\"" ./deploy/charts/sgroups-k8s-api/Chart.yaml
+
+      - name: Package & Push - sgroups
+        run: |
+          helm registry login registry-1.docker.io \
+            -u prorobotech \
+            -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+          pkg=$(helm package ./deploy/charts/sgroups/Chart.yaml | awk '{print $NF}')
+          helm push "$pkg" oci://registry-1.docker.io/prorobotech
+
+      - name: Package & Push - sgroups-k8s-api
+        run: |
+          helm registry login registry-1.docker.io \
+            -u prorobotech \
+            -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+          pkg=$(helm package ./deploy/charts/sgroups-k8s-api/Chart.yaml | awk '{print $NF}')
+          helm push "$pkg" oci://registry-1.docker.io/prorobotech
