@@ -1,9 +1,9 @@
-{{- if and .Values.server.enabled (eq .Values.internalTLS.certSource "certmanager") }}
+{{- if eq .Values.internalTLS.certSource "certmanager" }}
 
 {{- $certmanager  := .Values.internalTLS.certmanager -}}
 {{- $extIssuer    := $certmanager.existingIssuer -}}
 {{- $issuerKind   := "Issuer" -}}
-{{- $issuerName   := (include "sgroups-k8s-api.labels" .) -}}
+{{- $issuerName   := (include "sgroups-k8s-api.fullname" .) -}}
 
 {{- if and $extIssuer.kind $extIssuer.name }}
   {{- $issuerKind   = $extIssuer.kind -}}
@@ -14,19 +14,19 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ include "sgroups-k8s-api.labels" . }}
+  name: {{ include "sgroups-k8s-api.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "k8s-role-graph.labels" . | nindent 4 }}
+    {{- include "sgroups-k8s-api.labels" . | nindent 4 }}
 spec:
   issuerRef:
     group: cert-manager.io
     kind: {{ $issuerKind }}
     name: {{ $issuerName }}
   dnsNames:
-    - "{{ include "sgroups-k8s-api.labels" . }}"
-    - "{{ include "sgroups-k8s-api.labels" . }}.{{ .Release.Namespace }}"
-    - "{{ include "sgroups-k8s-api.labels" . }}.{{ .Release.Namespace }}.svc"
+    - "{{ include "sgroups-k8s-api.fullname" . }}"
+    - "{{ include "sgroups-k8s-api.fullname" . }}.{{ .Release.Namespace }}"
+    - "{{ include "sgroups-k8s-api.fullname" . }}.{{ .Release.Namespace }}.svc"
     {{ if $certmanager.extraDnsNames }}
     {{ range $certmanager.extraDnsNames }}
     - {{ . }}
@@ -36,6 +36,6 @@ spec:
   ipAddresses:
     {{ . | toYaml | nindent 4 }}
   {{ end }}
-  commonName: "{{ .Release.Namespace }}"
-  secretName: {{ include "sgroups-k8s-api.labels" . }}
+  commonName: {{ include "sgroups-k8s-api.fullname" . }}
+  secretName: {{ include "sgroups-k8s-api.fullname" . }}
 {{- end }}

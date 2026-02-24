@@ -95,7 +95,7 @@ config:
     tlsPrivateKeyFile: /etc/sgroups/tls/tls.key
 
   grpc:
-    address: "sgroups-backend.sgroups-system.svc:9006"
+    address: "sgroups.sgroups-system.svc:9006"
     insecure: true
     timeout: 30s
     ca: ""

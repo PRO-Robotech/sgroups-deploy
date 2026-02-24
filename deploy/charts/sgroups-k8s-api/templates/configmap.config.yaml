@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "{{ include "sgroups.fullname" . }}-config"
+  name: "{{ include "sgroups-k8s-api.fullname" . }}-config"
   labels:
-    {{- include "sgroups.labels" . | nindent 4 }}
+    {{- include "sgroups-k8s-api.labels" . | nindent 4 }}
 data:
   config.yaml: |
     {{- toYaml .Values.config | nindent 4 }}

@@ -81,7 +81,7 @@ spec:
           secret:
             secretName: sgroups-apiserver-tls #TODO
         - configMap:
-            name: "{{ include "sgroups.fullname" . }}-config"
+            name: "{{ include "sgroups-k8s-api.fullname" . }}-config"
           name: config
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
