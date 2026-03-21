@@ -463,4 +463,85 @@ BEGIN;
             '',
             '1'
         );
+
+    INSERT INTO sgroups.tbl_network_binding(name, uid, ns, ag, network, display_name, comment, description, labels, annotations, resource_version)
+    VALUES
+        (
+            'nb-0',
+            '90ef841a-f480-405d-abb0-983baf038801',
+            (SELECT id FROM sgroups.tbl_namespace WHERE name = 'namespace-0'),
+            (SELECT id FROM sgroups.tbl_ag WHERE name = 'ag-0'),
+            (SELECT id FROM sgroups.tbl_network WHERE name = 'nw-0'),
+            'network binding 0',
+            'for search by name/ns',
+            'network binding for search',
+            'labels => search',
+            'search => labels',
+            '1'
+        ),
+        (
+            'nb-1',
+            '9b187907-29ef-4de1-a798-d6537c8a95b1',
+            (SELECT id FROM sgroups.tbl_namespace WHERE name = 'namespace-1'),
+            (SELECT id FROM sgroups.tbl_ag WHERE name = 'ag-1'),
+            (SELECT id FROM sgroups.tbl_network WHERE name = 'nw-1'),
+            'network binding 1',
+            'for search by name/ns',
+            'network binding for search',
+            'labels => ns',
+            'search => name',
+            '1'
+        ),
+        (
+            'nb-2',
+            'fdcb56b7-94fe-412d-b7c7-e5ccf1f94085',
+            (SELECT id FROM sgroups.tbl_namespace WHERE name = 'namespace-2'),
+            (SELECT id FROM sgroups.tbl_ag WHERE name = 'ag-2'),
+            (SELECT id FROM sgroups.tbl_network WHERE name = 'nw-2'),
+            'network binding 2',
+            'for search by labels',
+            'network binding for search labels',
+            'search => nameLabels',
+            '',
+            '1'
+        ),
+        (
+            'nb-3',
+            '507404f0-6ddc-4d15-b7bd-6c59bdff1d24',
+            (SELECT id FROM sgroups.tbl_namespace WHERE name = 'namespace-1'),
+            (SELECT id FROM sgroups.tbl_ag WHERE name = 'ag-3'),
+            (SELECT id FROM sgroups.tbl_network WHERE name = 'nw-3'),
+            'network binding 3',
+            'for search by labels',
+            'network binding for search labels',
+            'search => nameLabels',
+            '',
+            '1'
+        ),
+        (
+            'nb-4',
+            '7019ef05-b363-42a5-a070-4d205a9d729e',
+            (SELECT id FROM sgroups.tbl_namespace WHERE name = 'namespace-1'),
+            (SELECT id FROM sgroups.tbl_ag WHERE name = 'ag-3'),
+            (SELECT id FROM sgroups.tbl_network WHERE name = 'nw-6'),
+            'network binding 4',
+            'for delete ns+name',
+            'network binding for delete',
+            'delete => name',
+            '',
+            '1'
+        ),
+        (
+            'nb-5',
+            'c3aae183-6261-471b-a024-7c435319cfdb',
+            (SELECT id FROM sgroups.tbl_namespace WHERE name = 'namespace-1'),
+            (SELECT id FROM sgroups.tbl_ag WHERE name = 'ag-3'),
+            (SELECT id FROM sgroups.tbl_network WHERE name = 'nw-7'),
+            'network binding 5',
+            'for delete ns+name',
+            'network binding for delete',
+            'delete => name',
+            '',
+            '1'
+        );
 COMMIT;
