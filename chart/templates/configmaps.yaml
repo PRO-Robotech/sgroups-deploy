@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sgroups.backendConfigName" . }}
+  namespace: {{ include "sgroups.namespace" . }}
+  labels:
+    {{- include "sgroups.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    logger:
+      level: {{ .Values.backend.config.logger.level }}
+    metrics:
+      enable: {{ .Values.backend.config.metrics.enable }}
+    healthcheck:
+      enable: {{ .Values.backend.config.healthcheck.enable }}
+    server:
+      endpoint: {{ .Values.backend.config.server.endpoint }}
+      graceful-shutdown: {{ .Values.backend.config.server.gracefulShutdown }}
+      use-proto-validator: {{ .Values.backend.config.server.useProtoValidator }}
+    storage:
+      type: {{ .Values.backend.config.storage.type }}
+      postgres:
+        url: {{ include "sgroups.backendPostgresUrl" . }}
+    authn:
+      type: {{ .Values.backend.config.authn.type }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sgroups.apiserverConfigName" . }}
+  namespace: {{ include "sgroups.namespace" . }}
+  labels:
+    {{- include "sgroups.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    serving:
+      securePort: {{ .Values.apiserver.config.serving.securePort }}
+      tlsCertFile: /etc/sgroups/tls/tls.crt
+      tlsPrivateKeyFile: /etc/sgroups/tls/tls.key
+
+    grpc:
+      address: {{ include "sgroups.backendGrpcAddress" . | quote }}
+      insecure: {{ .Values.apiserver.config.grpc.insecure }}
+      timeout: {{ .Values.apiserver.config.grpc.timeout }}
+      ca: {{ .Values.apiserver.config.grpc.ca | quote }}
+      cert: {{ .Values.apiserver.config.grpc.cert | quote }}
+      key: {{ .Values.apiserver.config.grpc.key | quote }}
+      serverName: {{ .Values.apiserver.config.grpc.serverName | quote }}
+      maxRecvMsgSize: {{ printf "%d" (int64 .Values.apiserver.config.grpc.maxRecvMsgSize) }}
+      keepaliveTime: {{ .Values.apiserver.config.grpc.keepaliveTime }}
+      keepaliveTimeout: {{ .Values.apiserver.config.grpc.keepaliveTimeout }}
+      permitWithoutStream: {{ .Values.apiserver.config.grpc.permitWithoutStream }}
+      minConnectTimeout: {{ .Values.apiserver.config.grpc.minConnectTimeout }}
+      backoffMaxDelay: {{ .Values.apiserver.config.grpc.backoffMaxDelay }}

@@ -1,0 +1,14 @@
+helm uninstall sgroups-stack -n sgroups-system
+kubectl delete namespace sgroups-system --ignore-not-found
+kubectl get ns sgroups-system -w
+
+helm install sgroups-stack . --namespace sgroups-system --create-namespace
+
+or
+
+helm upgrade --install sgroups-stack . \
+ --namespace sgroups-system \
+ --create-namespace \
+ --debug \
+ --wait \
+ --timeout 10m

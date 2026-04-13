@@ -1,0 +1,56 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "sgroups.selfSignedIssuerName" . }}
+  namespace: {{ include "sgroups.namespace" . }}
+  labels:
+    {{- include "sgroups.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "sgroups.caCertName" . }}
+  namespace: {{ include "sgroups.namespace" . }}
+  labels:
+    {{- include "sgroups.labels" . | nindent 4 }}
+spec:
+  isCA: true
+  commonName: {{ include "sgroups.caCertName" . }}
+  secretName: {{ include "sgroups.caSecretName" . }}
+  duration: {{ .Values.certificates.ca.duration }}
+  issuerRef:
+    name: {{ include "sgroups.selfSignedIssuerName" . }}
+    kind: Issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "sgroups.caIssuerName" . }}
+  namespace: {{ include "sgroups.namespace" . }}
+  labels:
+    {{- include "sgroups.labels" . | nindent 4 }}
+spec:
+  ca:
+    secretName: {{ include "sgroups.caSecretName" . }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "sgroups.apiserverCertName" . }}
+  namespace: {{ include "sgroups.namespace" . }}
+  labels:
+    {{- include "sgroups.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "sgroups.apiserverTlsSecretName" . }}
+  duration: {{ .Values.certificates.apiserver.duration }}
+  renewBefore: {{ .Values.certificates.apiserver.renewBefore }}
+  issuerRef:
+    name: {{ include "sgroups.caIssuerName" . }}
+    kind: Issuer
+  dnsNames:
+    - {{ include "sgroups.apiserverName" . }}
+    - {{ include "sgroups.apiserverName" . }}.{{ include "sgroups.namespace" . }}
+    - {{ include "sgroups.apiserverName" . }}.{{ include "sgroups.namespace" . }}.svc
+    - {{ include "sgroups.apiserverName" . }}.{{ include "sgroups.namespace" . }}.svc.cluster.local

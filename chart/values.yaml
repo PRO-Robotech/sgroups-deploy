@@ -1,0 +1,126 @@
+namespace:
+  create: false
+
+nameOverride: ""
+fullnameOverride: "sgroups"
+
+imagePullPolicy: IfNotPresent
+
+image:
+  backend:
+    repository: prorobotech/sgroups-server
+    tag: feature-cloud-498-services-91ff6d3c
+  migration:
+    repository: prorobotech/sgroups-goose
+    tag: feature-cloud-498-services-91ff6d3c
+  apiserver:
+    repository: prorobotech/sgroups-k8s-api
+    tag: feature-cloud-498-services-1045439f
+  postgres:
+    repository: postgres
+    tag: 16-alpine
+
+backend:
+  replicaCount: 1
+  command:
+    - /app/bin/sg-server
+  service:
+    port: 9006
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  config:
+    logger:
+      level: INFO
+    metrics:
+      enable: true
+    healthcheck:
+      enable: true
+    server:
+      endpoint: tcp://0.0.0.0:9006
+      gracefulShutdown: 10s
+      useProtoValidator: false
+    storage:
+      type: postgres
+      postgres:
+        poolMaxConns: 500
+        sslMode: disable
+    authn:
+      type: none
+
+apiserver:
+  replicaCount: 1
+  service:
+    port: 443
+    targetPort: 8443
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  securityContext:
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+  config:
+    serving:
+      securePort: 8443
+    grpc:
+      insecure: true
+      timeout: 30s
+      ca: ""
+      cert: ""
+      key: ""
+      serverName: ""
+      maxRecvMsgSize: 16777216
+      keepaliveTime: 30s
+      keepaliveTimeout: 10s
+      permitWithoutStream: true
+      minConnectTimeout: 10s
+      backoffMaxDelay: 120s
+
+postgres:
+  enabled: true
+  auth:
+    username: user_admin
+    password: qwerty
+    database: sgroups
+  service:
+    port: 5432
+  persistence:
+    size: 1Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+migration:
+  command:
+    - /app/bin/goose
+  dir: /app
+  backoffLimit: 5
+  ttlSecondsAfterFinished: 300
+  waitForPostgres:
+    image:
+      repository: postgres
+      tag: 16-alpine
+
+certificates:
+  ca:
+    duration: 87600h
+  apiserver:
+    duration: 8760h
+    renewBefore: 720h
+
+apiService:
+  group: sgroups.io
+  version: v1alpha1
+  groupPriorityMinimum: 1000
+  versionPriority: 15

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sgroups.backendName" . }}
+  namespace: {{ include "sgroups.namespace" . }}
+  labels:
+    {{- include "sgroups.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "sgroups.backendName" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "sgroups.backendName" . }}
+        {{- include "sgroups.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: sg-server
+          image: {{ include "sgroups.backendImage" . }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command:
+            {{- toYaml .Values.backend.command | nindent 12 }}
+          args:
+            - -config=/etc/sgroups/config/config.yaml
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.backend.service.port }}
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: {{ .Values.backend.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: {{ .Values.backend.service.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+          volumeMounts:
+            - name: backend-config
+              mountPath: /etc/sgroups/config
+              readOnly: true
+      volumes:
+        - name: backend-config
+          configMap:
+            name: {{ include "sgroups.backendConfigName" . }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sgroups.backendName" . }}
+  namespace: {{ include "sgroups.namespace" . }}
+  labels:
+    {{- include "sgroups.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: {{ include "sgroups.backendName" . }}
+  ports:
+    - name: grpc
+      port: {{ .Values.backend.service.port }}
+      targetPort: {{ .Values.backend.service.port }}

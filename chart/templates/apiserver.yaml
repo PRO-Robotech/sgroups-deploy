@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sgroups.apiserverName" . }}
+  namespace: {{ include "sgroups.namespace" . }}
+  labels:
+    {{- include "sgroups.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.apiserver.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "sgroups.apiserverName" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "sgroups.apiserverName" . }}
+        {{- include "sgroups.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "sgroups.apiserverServiceAccountName" . }}
+      containers:
+        - name: apiserver
+          image: {{ include "sgroups.apiserverImage" . }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          args:
+            - --config=/etc/sgroups/config/config.yaml
+          ports:
+            - name: https
+              containerPort: {{ .Values.apiserver.service.targetPort }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.apiserver.service.targetPort }}
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.apiserver.service.targetPort }}
+              scheme: HTTPS
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.apiserver.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.apiserver.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: apiserver-tls
+              mountPath: /etc/sgroups/tls
+              readOnly: true
+            - name: apiserver-config
+              mountPath: /etc/sgroups/config
+              readOnly: true
+      volumes:
+        - name: apiserver-tls
+          secret:
+            secretName: {{ include "sgroups.apiserverTlsSecretName" . }}
+        - name: apiserver-config
+          configMap:
+            name: {{ include "sgroups.apiserverConfigName" . }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sgroups.apiserverName" . }}
+  namespace: {{ include "sgroups.namespace" . }}
+  labels:
+    {{- include "sgroups.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: {{ include "sgroups.apiserverName" . }}
+  ports:
+    - name: https
+      port: {{ .Values.apiserver.service.port }}
+      targetPort: {{ .Values.apiserver.service.targetPort }}
