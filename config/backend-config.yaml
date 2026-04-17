@@ -14,6 +14,6 @@ server:
 storage:
   type: postgres
   postgres:
-    url: postgres://user_admin:qwerty@sgroups-postgres.sgroups-system.svc:5432/sgroups?sslmode=disable&pool_max_conns=500
+    url: postgres://user_admin:qwerty@sgroups-postgres.sgroups-system.svc:5432/sgroups?sslmode=disable&pool_max_conns=1000
 authn:
   type: none

@@ -51,6 +51,13 @@ spec:
         - name: postgres
           image: {{ include "sgroups.postgresImage" . }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
+          {{- with .Values.postgres.runtimeParameters }}
+          args:
+            {{- range $key, $value := . }}
+            - -c
+            - {{ printf "%s=%v" $key $value | quote }}
+            {{- end }}
+          {{- end }}
           ports:
             - name: postgres
               containerPort: {{ .Values.postgres.service.port }}

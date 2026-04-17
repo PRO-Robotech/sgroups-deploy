@@ -47,7 +47,7 @@ backend:
     storage:
       type: postgres
       postgres:
-        poolMaxConns: 500
+        poolMaxConns: 1000
         sslMode: disable
     authn:
       type: none
@@ -91,6 +91,8 @@ postgres:
     username: user_admin
     password: qwerty
     database: sgroups
+  runtimeParameters:
+    max_connections: 1500
   service:
     port: 5432
   persistence:
