@@ -38,18 +38,36 @@ spec:
       {{- end }}
       containers:
         - name: agent
-          {{- with .Values.securityContext }}
+          {{- with .Values.agent.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          commands:
+          image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.agent.image.pullPolicy }}
+          command:
             - "/bin/sh"
             - "-c"
             - |
-              export NFT_HOSTINFO_NAME=${POD_NAMESPACE}/${POD_NAME};
               /app/bin/to-nft --config /opt/h-bf/sgroups/client/config.yaml
+          {{- with .Values.agent.lifecycle }}
+          lifecycle:
+            {{- if .postStart }}
+            postStart:
+              exec:
+                command:
+                  - "/bin/sh"
+                  - "-c"
+                  - {{ .postStart | quote }}
+            {{- end }}
+            {{- if .preStop }}
+            preStop:
+              exec:
+                command:
+                  - "/bin/sh"
+                  - "-c"
+                  - {{ .preStop | quote }}
+            {{- end }}
+          {{- end }}
           env:
             - name: POD_NAME
               valueFrom:
@@ -63,8 +81,55 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
+            {{- range $k, $v := .Values.agent.extraEnv }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.agent.metrics }}
+              protocol: TCP
+          {{- with .Values.agent.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.agent.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.agent.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: agent-config
+              mountPath: /opt/h-bf/sgroups/client/
+              readOnly: true
+          {{- with .Values.agent.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- if .Values.collector.enabled }}
+        - name: debug
+          {{- with .Values.collector.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.collector.image.repository }}:{{ .Values.collector.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.collector.image.pullPolicy }}
+          command: []
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
             - name: NFT_HOSTINFO_UID
-              value: "$(POD_NAMESPACE)/$(POD_NAME)"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
             {{- range $k, $v := .Values.agent.extraEnv }}
             - name: {{ $k }}
               value: {{ $v | quote }}
@@ -92,13 +157,65 @@ spec:
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+        {{- end }}
+        {{- if .Values.debug.enabled }}
+        - name: debug
+          {{- with .Values.debug.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.debug.image.repository }}:{{ .Values.debug.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.debug.image.pullPolicy }}
+          command:
+            - "/bin/sh"
+            - "-c"
+            - |
+              /app/bin/to-nft --config /opt/h-bf/sgroups/client/config.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NFT_HOSTINFO_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            {{- range $k, $v := .Values.agent.extraEnv }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.agent.metrics }}
+              protocol: TCP
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: agent-config
+              mountPath: /opt/h-bf/sgroups/client/
+              readOnly: true
+          {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- end }}
       volumes:
         - name: agent-config
           configMap:
             name: {{ include "to-nft.fullname" . }}-agent-config
-
-
-
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

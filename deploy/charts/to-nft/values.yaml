@@ -110,6 +110,80 @@ agent:
   #   mountPath: "/etc/foo"
   #   readOnly: true
 
+  lifecycle:
+    postStart: |
+      kubectl apply -f - <<EOF
+      ---
+      apiVersion: netguard.sgroups.io/v1beta1
+      kind: Host
+      metadata:
+        name: ${NFT_HOSTNAME}
+        namespace: ${NFT_NAMESPACE}
+      spec:
+        uuid: ${NFT_UID}
+      EOF
+    preStop: |
+      kubectl -n ${NFT_NAMESPACE} delete hosts.netguard.sgroups.io ${NFT_HOSTNAME}
+
+  config:
+    hostinfo:
+      name: host1
+      namespace: "ns1"
+    exit-on-success: false
+    graceful-shutdown: 10s
+    def-policy-accept: true
+    logger:
+      level: DEBUG
+    fqdn-rules:
+      strategy: dns
+    extapi:
+      svc:
+        def-daial-duration: 10s
+        sgroups:
+          dial-duration: 3s
+          address: 127.0.0.1:9006
+          sync-status:
+            interval: 3s #mandatory
+          #check-sync-status: 5s
+          use-json-codec: false
+          # api-path-prefix: "/apis/sgroups.io/v1"
+          authn:
+            type: none
+            # tls:
+            #   key-file: "/opt/h-bf/sgroups/tls/tls.key"
+            #   cert-file: "/opt/h-bf/sgroups/tls/tls.crt"
+            #   server:
+            #     verify: true
+            #     ca-files:
+            #       - "/opt/h-bf/sgroups/tls/ca.crt"
+    netlink:
+      watcher: #netlink watcher
+        linger: 1s
+    base-rules: |
+      [
+        {
+          "nets": ["10.0.0.0/16","10.0.1.0/24"]
+        }
+      ]
+    dns:
+      nameservers: ["8.8.8.8", "1.1.1.1"]
+      proto: udp
+      port: 53
+      dial-duration: 3s
+      read-duration: 5s
+      write-duration: 5s
+      retries: 5
+      retry-timeout: 3s
+    telemetry:
+      useragent: "string"
+      endpoint: 0.0.0.0:9660
+      metrics:
+        enable: true
+      healthcheck:
+        enable: true
+      profile:
+        enable: true
+
 collector:
   enabled: true
   # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
