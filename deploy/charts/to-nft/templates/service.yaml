@@ -8,8 +8,14 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.agent.metrics }}
-      targetPort: http
+      targetPort: metrics
       protocol: TCP
-      name: http
+      name: metrics
+    {{- if .Values.collector.enabled }}
+    - port: {{ .Values.service.collector.metrics | default 9680 }}
+      targetPort: collector
+      protocol: TCP
+      name: collector
+    {{- end }}
   selector:
     {{- include "to-nft.selectorLabels" . | nindent 4 }}

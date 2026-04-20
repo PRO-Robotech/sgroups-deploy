@@ -75,7 +75,7 @@ spec:
             {{- end }}
           {{- end }}
           ports:
-            - name: http
+            - name: metrics
               containerPort: {{ .Values.service.agent.metrics }}
               protocol: TCP
           {{- with .Values.agent.livenessProbe }}
@@ -128,7 +128,7 @@ spec:
               value: {{ $v | quote }}
             {{- end }}
           ports:
-            - name: metrics
+            - name: collector
               containerPort: {{ .Values.service.collector.metrics | default 9680 }}
               protocol: TCP
           {{- with .Values.collector.livenessProbe }}

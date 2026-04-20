@@ -225,6 +225,45 @@ collector:
   #   mountPath: "/etc/foo"
   #   readOnly: true
 
+  config:
+    logger:
+        level: DEBUG
+    trace-provider:
+        use-aggregation: false
+        queue-size: 2000000
+        collector:
+          type: netlink
+          ebpf:
+            rcv-buffer-size: 16777216
+            sample-rate: 0
+            events-rate: 5
+          netlink:
+            rcv-buffer-size: 16777216
+    trace-exporter:
+        target: server
+        server:
+          dial-duration: 3s
+          address: prd-server:9650
+          compression: none
+          authn:
+            type: none # tls
+            # tls:
+            #   key-file: "/opt/h-bf/sgroups/tls/tls.key"
+            #   cert-file: "/opt/h-bf/sgroups/tls/tls.crt"
+            #   server:
+            #     verify: true
+            #     ca-files:
+            #       - "/opt/h-bf/sgroups/tls/ca.crt"
+    tracer:
+        flush-interval: 1s
+        batch-size: 10000
+    telemetry:
+        endpoint: tcp://0.0.0.0:9680
+        metrics:
+          enable: true
+        healthcheck:
+          enable: true
+
 debug:
   enabled: true
   # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
