@@ -3,9 +3,8 @@
 # Declare variables to be passed into your templates.
 
 type: DaemonSet # Deployment
-
-# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
 replicaCount: 1
+terminationGracePeriodSeconds: 30
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
@@ -50,20 +49,16 @@ service:
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   agent:
     metrics: 9660
+  collector:
+    metrics: 9680
 
 # Additional volumes on the output Deployment definition.
 volumes: []
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
-
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}
 
+# Agent container configuration
 agent:
   # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
   image:
@@ -73,8 +68,8 @@ agent:
     # Overrides the image tag whose default is the chart appVersion.
     tag: feature-cloud-339-ie-cidr-svc-rule-57117adb
 
-    extraEnv:
-      NFT_DEF_POLICY_ACCEPT: true
+  extraEnv:
+    NFT_DEF_POLICY_ACCEPT: "true"
 
   securityContext:
     allowPrivilegeEscalation: true
@@ -184,12 +179,12 @@ agent:
       profile:
         enable: true
 
+# Collector container configuration
 collector:
   enabled: true
   # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
   image:
-    repository: nginx
-    # This sets the pull policy for images.
+    repository: heaphero/prd.trace-collector
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
@@ -218,11 +213,11 @@ collector:
   livenessProbe:
     httpGet:
       path: /
-      port: http
+      port: metrics
   readinessProbe:
     httpGet:
       path: /
-      port: http
+      port: metrics
 
   # Additional volumeMounts on the output Deployment definition.
   volumeMounts: []
@@ -234,8 +229,7 @@ debug:
   enabled: true
   # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
   image:
-    repository: nginx
-    # This sets the pull policy for images.
+    repository: heaphero/prd.debug
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""

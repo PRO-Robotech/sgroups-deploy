@@ -1,10 +1,12 @@
 ---
+# Client configuration for agent container
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "to-nft.fullname" . }}-agent-config
   labels:
     {{- include "to-nft.labels" . | nindent 4 }}
+    app.kubernetes.io/component: agent
 data:
   config.yaml: |
     {{ .Values.agent.config | toYaml | nindent 4 }}
