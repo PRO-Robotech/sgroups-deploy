@@ -55,25 +55,6 @@ spec:
           args:
             - --config
             - /opt/h-bf/sgroups/client/config.yaml
-          {{- with .Values.agent.lifecycle }}
-          lifecycle:
-            {{- if .postStart }}
-            postStart:
-              exec:
-                command:
-                  - /bin/sh
-                  - -c
-                  - {{ .postStart | quote }}
-            {{- end }}
-            {{- if .preStop }}
-            preStop:
-              exec:
-                command:
-                  - /bin/sh
-                  - -c
-                  - {{ .preStop | quote }}
-            {{- end }}
-          {{- end }}
           ports:
             - name: metrics
               containerPort: {{ .Values.service.agent.metrics }}
@@ -97,6 +78,55 @@ spec:
           {{- with .Values.agent.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+        {{- if .Values.hosthooks.enabled }}
+        - name: hosthooks
+          image: "{{ .Values.hosthooks.image.repository }}:{{ .Values.hosthooks.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.hosthooks.image.pullPolicy }}
+          command:
+            - "/bin/sh"
+            - "-lc"
+            - "echo ready; tail -f /dev/null"
+          env:
+            - name: NFT_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NFT_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NFT_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            {{- range $k, $v := .Values.hosthooks.extraEnv }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          {{- with .Values.hosthooks.lifecycle }}
+          lifecycle:
+            {{- if .postStart }}
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - {{ .postStart | quote }}
+            {{- end }}
+            {{- if .preStop }}
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - {{ .preStop | quote }}
+            {{- end }}
+          {{- end }}
+          {{- with .Values.hosthooks.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- end }}
         {{- if .Values.collector.enabled }}
         - name: collector
           {{- with .Values.collector.securityContext }}
