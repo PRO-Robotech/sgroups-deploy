@@ -106,19 +106,21 @@ agent:
   #   readOnly: true
 
   lifecycle:
-    postStart: |
-      kubectl apply -f - <<EOF
-      ---
-      apiVersion: netguard.sgroups.io/v1beta1
-      kind: Host
-      metadata:
-        name: ${NFT_HOSTNAME}
-        namespace: ${NFT_NAMESPACE}
-      spec:
-        uuid: ${NFT_UID}
-      EOF
-    preStop: |
-      kubectl -n ${NFT_NAMESPACE} delete hosts.netguard.sgroups.io ${NFT_HOSTNAME}
+    postStart: "ls"
+      # |
+      # kubectl apply -f - <<EOF
+      # ---
+      # apiVersion: netguard.sgroups.io/v1beta1
+      # kind: Host
+      # metadata:
+      #   name: ${NFT_HOSTNAME}
+      #   namespace: ${NFT_NAMESPACE}
+      # spec:
+      #   uuid: ${NFT_UID}
+      # EOF
+    preStop: "ls"
+      # |
+      # kubectl -n ${NFT_NAMESPACE} delete hosts.netguard.sgroups.io ${NFT_HOSTNAME}
 
   config:
     hostinfo:
