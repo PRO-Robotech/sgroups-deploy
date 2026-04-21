@@ -156,3 +156,8 @@ postgresql:
       scripts:
         01_enable_hstore.sql: |
           CREATE EXTENSION IF NOT EXISTS hstore SCHEMA public;
+
+databaseConnectionStringArgs:
+  sslmode: disable
+  pool_max_conns: 100
+  # pool_min_conns: 10
