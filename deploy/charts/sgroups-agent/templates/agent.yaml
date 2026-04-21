@@ -109,7 +109,7 @@ spec:
             - /app/bin/trace-collector
           args:
             - --config
-            - /opt/h-bf/sgroups/collector/config.json
+            - /opt/h-bf/sgroups/collector/config.yaml
           env:
             - name: POD_NAME
               valueFrom:

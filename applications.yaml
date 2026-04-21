@@ -16,6 +16,8 @@ spec:
     helm:
       releaseName: sgroups
       valuesObject:
+        nameOverride: sgroups
+        fullnameOverride: sgroups
         externalDatabase:
           enabled: false
         postgresql:
@@ -53,11 +55,16 @@ spec:
   project: default
   source:
     repoURL: registry-1.docker.io/prorobotech
-    targetRevision: 0.0.1-cc19bf3
+    targetRevision: 0.0.0-feature-to-nft-6541385
     chart: sgroups-agent-chart
     helm:
-      releaseName: sgroups
+      releaseName: sgroups-agent
       valuesObject:
+        fullnameOverride: sgroups-agent
+        nameOverride: sgroups-agent
+        agent:
+          image:
+            repository: prorobotech/sgroups-agent
         collector:
           image:
             repository: heaphero/prd.trace-collector
@@ -91,6 +98,8 @@ spec:
     helm:
       releaseName: sgroups-k8s-api
       valuesObject:
+        nameOverride: sgroups-k8s-api
+        fullnameOverride: sgroups-k8s-api
         config:
           grpc:
             address: "sgroups.incloud-sgroups.svc:9006"
