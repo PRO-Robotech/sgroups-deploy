@@ -5,16 +5,16 @@ kind: Deployment
 kind: DaemonSet
 {{- end }}
 metadata:
-  name: {{ include "to-nft.fullname" . }}
+  name: {{ include "sgroups-agent.fullname" . }}
   labels:
-    {{- include "to-nft.labels" . | nindent 4 }}
+    {{- include "sgroups-agent.labels" . | nindent 4 }}
 spec:
   {{- if and (not .Values.autoscaling.enabled) (eq .Values.type "Deployment") }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "to-nft.selectorLabels" . | nindent 6 }}
+      {{- include "sgroups-agent.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -27,7 +27,7 @@ spec:
         checksum/collector-config: {{ include (print $.Template.BasePath "/collector.configmap.yaml") . | sha256sum }}
         {{- end }}
       labels:
-        {{- include "to-nft.labels" . | nindent 8 }}
+        {{- include "sgroups-agent.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -36,7 +36,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "to-nft.serviceAccountName" . }}
+      serviceAccountName: {{ include "sgroups-agent.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -51,7 +51,7 @@ spec:
           image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.agent.image.pullPolicy }}
           command:
-            - /app/bin/to-nft 
+            - /app/bin/sgroups-agent 
           args:
             - --config
             - /opt/h-bf/sgroups/client/config.yaml
@@ -103,7 +103,7 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.collector.image.repository }}:{{ .Values.collector.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.collector.image.repository }}:{{ .Values.collector.image.tag }}"
           imagePullPolicy: {{ .Values.collector.image.pullPolicy }}
           command:
             - /app/bin/trace-collector
@@ -191,11 +191,11 @@ spec:
       volumes:
         - name: agent-config
           configMap:
-            name: {{ include "to-nft.fullname" . }}-agent-config
+            name: {{ include "sgroups-agent.fullname" . }}-agent-config
             defaultMode: 0644
         - name: collector-config
           configMap:
-            name: {{ include "to-nft.fullname" . }}-collector-config
+            name: {{ include "sgroups-agent.fullname" . }}-collector-config
             defaultMode: 0644
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}

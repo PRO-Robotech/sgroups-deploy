@@ -44,6 +44,39 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: sgroups-agent
+  namespace: incloud-argocd
+spec:
+  destination:
+    namespace: incloud-sgroups
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: registry-1.docker.io/prorobotech
+    targetRevision: 0.0.1-cc19bf3
+    chart: sgroups-agent-chart
+    helm:
+      releaseName: sgroups
+      valuesObject:
+        collector:
+          image:
+            repository: heaphero/prd.trace-collector
+            tag: feature-cloud-87-tls-c4931993
+        debug:
+          image:
+            repository: heaphero/prd.debug
+            tag: main-2db719de
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: sgroups-k8s-api
   namespace: incloud-argocd
 spec:

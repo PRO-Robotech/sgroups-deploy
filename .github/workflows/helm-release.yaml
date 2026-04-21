@@ -40,6 +40,9 @@ jobs:
           echo "Using chart version sgroups: $VERSION"
           yq -i ".version = \"${VERSION}\"" ./deploy/charts/sgroups/Chart.yaml
 
+          echo "Using chart version sgroups-agent: $VERSION"
+          yq -i ".version = \"${VERSION}\"" ./deploy/charts/sgroups-agent/Chart.yaml
+
           echo "Using chart version sgroups-k8s-api: $VERSION"
           yq -i ".version = \"${VERSION}\"" ./deploy/charts/sgroups-k8s-api/Chart.yaml
 
@@ -50,6 +53,15 @@ jobs:
             -p ${{ secrets.DOCKERHUB_TOKEN }}
 
           pkg=$(helm package "./deploy/charts/sgroups" | awk '{print $NF}')
+          helm push "$pkg" oci://registry-1.docker.io/prorobotech
+
+      - name: Package & Push - sgroups-agent
+        run: |
+          helm registry login registry-1.docker.io \
+            -u prorobotech \
+            -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+          pkg=$(helm package "./deploy/charts/sgroups-agent" | awk '{print $NF}')
           helm push "$pkg" oci://registry-1.docker.io/prorobotech
 
       - name: Package & Push - sgroups-k8s-api

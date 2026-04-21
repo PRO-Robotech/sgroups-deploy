@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "to-nft.fullname" . }}
+  name: {{ include "sgroups-agent.fullname" . }}
   labels:
-    {{- include "to-nft.labels" . | nindent 4 }}
+    {{- include "sgroups-agent.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "to-nft.fullname" . }}
+    name: {{ include "sgroups-agent.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
