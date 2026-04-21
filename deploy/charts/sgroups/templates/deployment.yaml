@@ -88,7 +88,7 @@ spec:
             - sh
             - -c
             - |
-                /app/bin/goose -table=sg_db_ver -dir /app postgres $(SG_STORAGE_POSTGRES_URL) up
+                /app/bin/goose -table=sg_db_ver -dir /app postgres "$(SG_GOOSE_POSTGRES_URL)" up
           envFrom:
             - secretRef:
                 name: {{ include "sgroups.fullname" . }}-database
