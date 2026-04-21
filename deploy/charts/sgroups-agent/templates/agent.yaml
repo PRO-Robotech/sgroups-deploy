@@ -51,7 +51,7 @@ spec:
           image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.agent.image.pullPolicy }}
           command:
-            - /app/bin/sgroups-agent 
+            - /app/bin/sg-agent
           args:
             - --config
             - /opt/h-bf/sgroups/client/config.yaml
