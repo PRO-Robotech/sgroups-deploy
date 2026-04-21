@@ -11,7 +11,7 @@ spec:
   project: default
   source:
     repoURL: registry-1.docker.io/prorobotech
-    targetRevision: 0.0.1-cc19bf3
+    targetRevision: 0.0.0-feature-to-nft-96ed71e
     chart: sgroups-chart
     helm:
       releaseName: sgroups
@@ -55,7 +55,7 @@ spec:
   project: default
   source:
     repoURL: registry-1.docker.io/prorobotech
-    targetRevision: 0.0.0-feature-to-nft-6541385
+    targetRevision: 0.0.0-feature-to-nft-96ed71e
     chart: sgroups-agent-chart
     helm:
       releaseName: sgroups-agent
@@ -63,16 +63,19 @@ spec:
         fullnameOverride: sgroups-agent
         nameOverride: sgroups-agent
         agent:
-          image:
-            repository: prorobotech/sgroups-agent
+          config:
+            base-rules: |
+              [
+                {
+                  "nets": [
+                    "0.0.0.0/0"
+                  ]
+                }
+              ]
         collector:
-          image:
-            repository: heaphero/prd.trace-collector
-            tag: feature-cloud-87-tls-c4931993
+          enabled: false
         debug:
-          image:
-            repository: heaphero/prd.debug
-            tag: main-2db719de
+          enabled: false
   syncPolicy:
     automated:
       prune: true
@@ -93,7 +96,7 @@ spec:
   project: default
   source:
     repoURL: registry-1.docker.io/prorobotech
-    targetRevision: 0.0.1-cc19bf3
+    targetRevision: 0.0.0-feature-to-nft-96ed71e
     chart: sgroups-k8s-api-chart
     helm:
       releaseName: sgroups-k8s-api

@@ -122,8 +122,8 @@ agent:
 
   config:
     hostinfo:
-      name: host1
-      namespace: "ns1"
+      name: host-example
+      namespace: "incloud-sgroups"
     exit-on-success: false
     graceful-shutdown: 10s
     def-policy-accept: true
@@ -136,7 +136,7 @@ agent:
         def-daial-duration: 10s
         sgroups:
           dial-duration: 3s
-          address: 127.0.0.1:9006
+          address: sgroups:9006
           sync-status:
             interval: 3s #mandatory
           #check-sync-status: 5s
@@ -157,11 +157,17 @@ agent:
     base-rules: |
       [
         {
-          "nets": ["10.0.0.0/16","10.0.1.0/24"]
+          "nets": [
+            "10.0.0.0/16",
+            "10.0.1.0/24",
+            "10.244.0.0/16",
+            "29.64.0.0/16",
+            "8.8.8.8/32"
+            ]
         }
       ]
     dns:
-      nameservers: ["8.8.8.8", "1.1.1.1"]
+      nameservers: ["8.8.8.8"]
       proto: udp
       port: 53
       dial-duration: 3s
@@ -187,7 +193,7 @@ collector:
     repository: heaphero/prd.trace-collector
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: feature-cloud-87-tls-c4931993
 
   securityContext: {}
     # capabilities:
@@ -271,7 +277,7 @@ debug:
     repository: heaphero/prd.debug
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: main-2db719de
 
   securityContext: {}
     # capabilities:

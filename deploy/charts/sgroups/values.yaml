@@ -151,3 +151,8 @@ postgresql:
     database: sgroups
     username: sgroups
     password: sgroups
+  primary:
+    initdb:
+      scripts:
+        01_enable_hstore.sql: |
+          CREATE EXTENSION IF NOT EXISTS hstore SCHEMA public;
