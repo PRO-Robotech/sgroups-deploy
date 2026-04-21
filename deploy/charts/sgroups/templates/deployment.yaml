@@ -48,7 +48,7 @@ spec:
             - secretRef:
                 name: {{ include "sgroups.fullname" . }}-database
           ports:
-            - name: http
+            - name: grpc
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
