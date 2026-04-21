@@ -1,0 +1,16 @@
+{{- if .Values.hosthooks.enabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "sgroups-agent.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "sgroups-agent.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "sgroups-agent.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
