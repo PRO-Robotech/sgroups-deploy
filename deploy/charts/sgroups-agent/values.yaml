@@ -92,12 +92,12 @@ agent:
   # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
   livenessProbe:
     httpGet:
-      path: /
-      port: http
+      path: /metrics
+      port: metrics
   readinessProbe:
     httpGet:
-      path: /
-      port: http
+      path: /metrics
+      port: metrics
 
   # Additional volumeMounts on the output Deployment definition.
   volumeMounts: []
