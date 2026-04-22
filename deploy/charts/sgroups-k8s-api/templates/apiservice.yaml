@@ -8,10 +8,8 @@ metadata:
   labels:
     {{- include "sgroups-k8s-api.labels" . | nindent 4 }}
 spec:
-  caBundle: ""
   group: sgroups.io
   groupPriorityMinimum: 1000
-  insecureSkipTLSVerify: false
   service:
     name: {{ include "sgroups-k8s-api.fullname" . }}
     namespace: {{ .Release.Namespace }}
