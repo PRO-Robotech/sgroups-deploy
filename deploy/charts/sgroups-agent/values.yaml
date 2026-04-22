@@ -290,13 +290,11 @@ debug:
     # Overrides the image tag whose default is the chart appVersion.
     tag: main-2db719de
 
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  securityContext:
+    allowPrivilegeEscalation: true
+    privileged: true
+    runAsNonRoot: false
+    runAsUser: 0
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious

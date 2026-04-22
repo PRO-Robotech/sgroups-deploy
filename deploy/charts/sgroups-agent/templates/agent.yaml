@@ -205,6 +205,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
+            - name: PRD_DEF_APP_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
             {{- range $k, $v := .Values.debug.extraEnv }}
             - name: {{ $k }}
               value: {{ $v | quote }}
