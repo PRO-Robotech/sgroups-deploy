@@ -7,9 +7,10 @@ metadata:
   namespace: {{ $.Release.Namespace }}
 rules:
   - apiGroups:
-      - netguard.sgroups.io
+      - sgroups.io
     resources:
       - hosts
+      - tenants
     verbs:
       - create
       - delete
