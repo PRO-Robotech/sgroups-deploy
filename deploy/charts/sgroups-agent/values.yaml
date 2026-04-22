@@ -183,12 +183,6 @@ hosthooks:
       kubectl apply -f - <<EOF
       ---
       apiVersion: sgroups.io/v1alpha1
-      kind: Tenant
-      metadata:
-        name: ${NFT_NAMESPACE}
-
-      ---
-      apiVersion: sgroups.io/v1alpha1
       kind: Host
       metadata:
         name: ${NFT_HOSTNAME}

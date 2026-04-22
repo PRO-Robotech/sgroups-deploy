@@ -11,7 +11,7 @@ spec:
   project: default
   source:
     repoURL: registry-1.docker.io/prorobotech
-    targetRevision: 0.0.0-feature-to-nft-e4b3dd5
+    targetRevision: 0.0.0-feature-to-nft-31fc4e5
     chart: sgroups-chart
     helm:
       releaseName: sgroups
@@ -56,7 +56,7 @@ spec:
   project: default
   source:
     repoURL: registry-1.docker.io/prorobotech
-    targetRevision: 0.0.0-feature-to-nft-e4b3dd5
+    targetRevision: 0.0.0-feature-to-nft-31fc4e5
     chart: sgroups-agent-chart
     helm:
       releaseName: sgroups-agent
@@ -97,7 +97,7 @@ spec:
   project: default
   source:
     repoURL: registry-1.docker.io/prorobotech
-    targetRevision: 0.0.0-feature-to-nft-e4b3dd5
+    targetRevision: 0.0.0-feature-to-nft-31fc4e5
     chart: sgroups-k8s-api-chart
     helm:
       releaseName: sgroups-k8s-api

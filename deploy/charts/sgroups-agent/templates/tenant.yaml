@@ -1,0 +1,7 @@
+{{- if .Values.hosthooks.enabled }}
+---
+apiVersion: sgroups.io/v1alpha1
+kind: Tenant
+metadata:
+  name: {{ .Release.Namespace}}
+{{- end }}
