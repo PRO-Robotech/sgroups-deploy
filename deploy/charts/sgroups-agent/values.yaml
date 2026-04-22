@@ -182,16 +182,24 @@ hosthooks:
     postStart: |
       kubectl apply -f - <<EOF
       ---
-      apiVersion: netguard.sgroups.io/v1beta1
+      apiVersion: sgroups.io/v1alpha1
+      kind: Tenant
+      metadata:
+        name: ${NFT_NAMESPACE}
+
+      ---
+      apiVersion: sgroups.io/v1alpha1
       kind: Host
       metadata:
         name: ${NFT_HOSTNAME}
         namespace: ${NFT_NAMESPACE}
       spec:
-        uuid: ${NFT_UID}
+        displayName: SgroupsAgent Test Host
+        comment: created by sgroups-agent for testing purposes
+        description: Host for smoke tests
       EOF
     preStop: |
-      kubectl -n ${NFT_NAMESPACE} delete hosts.netguard.sgroups.io ${NFT_HOSTNAME}
+      kubectl -n ${NFT_NAMESPACE} delete hosts.sgroups.io ${NFT_HOSTNAME}
   resources: {}
 
 # Collector container configuration
