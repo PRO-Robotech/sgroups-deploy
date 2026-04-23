@@ -9,13 +9,13 @@ imagePullPolicy: IfNotPresent
 image:
   backend:
     repository: prorobotech/sgroups-server
-    tag: feature-cloud-498-services-91ff6d3c
+    tag: feature-cloud-498-services-ca87575f
   migration:
     repository: prorobotech/sgroups-goose
-    tag: feature-cloud-498-services-91ff6d3c
+    tag: feature-cloud-498-services-ca87575f
   apiserver:
     repository: prorobotech/sgroups-k8s-api
-    tag: feature-cloud-498-services-1045439f
+    tag: feature-cloud-498-services-e69ba481
   postgres:
     repository: postgres
     tag: 16-alpine
