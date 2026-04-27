@@ -17,6 +17,8 @@ spec:
         - name: sg-server
           image: sgroups-backend:latest
           imagePullPolicy: IfNotPresent
+          command:
+            - /app/bin/sg-server
           args:
             - -config=/etc/sgroups/config/config.yaml
           ports:

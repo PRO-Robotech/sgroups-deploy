@@ -1,0 +1,39 @@
+fullnameOverride: sgroups-agent
+nameOverride: sgroups-agent
+
+agent:
+  image:
+    repository: sgroups-agent
+    tag: latest
+    pullPolicy: IfNotPresent
+  config:
+    hostinfo:
+      name: host-1
+      namespace: sample-local
+    extapi:
+      svc:
+        sgroups:
+          address: sgroups.sgroups-system.svc:9006
+
+# hosthooks adds a tenant + Host CRD via kubectl sidecar; needs sgroups.io CRDs
+# served by sgroups-k8s-apiserver — disable for the kustomize-based local stack.
+hosthooks:
+  enabled: false
+
+collector:
+  enabled: false
+
+debug:
+  enabled: true
+  image:
+    repository: nicolaka/netshoot
+    tag: latest
+    pullPolicy: IfNotPresent
+  securityContext:
+    privileged: true
+    runAsNonRoot: false
+    runAsUser: 0
+    capabilities:
+      add:
+        - NET_ADMIN
+        - NET_RAW

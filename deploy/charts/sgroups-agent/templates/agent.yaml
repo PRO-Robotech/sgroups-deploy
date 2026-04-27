@@ -227,10 +227,12 @@ spec:
           configMap:
             name: {{ include "sgroups-agent.fullname" . }}-agent-config
             defaultMode: 0644
+        {{- if .Values.collector.enabled }}
         - name: collector-config
           configMap:
             name: {{ include "sgroups-agent.fullname" . }}-collector-config
             defaultMode: 0644
+        {{- end }}
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

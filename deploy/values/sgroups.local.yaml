@@ -1,0 +1,33 @@
+fullnameOverride: sgroups
+nameOverride: sgroups
+
+image:
+  repository: sgroups-backend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+migrations:
+  enabled: true
+  image:
+    repository: sgroups-migration
+    tag: latest
+    pullPolicy: IfNotPresent
+
+externalDatabase:
+  enabled: false
+
+postgresql:
+  enabled: true
+  primary:
+    persistence:
+      enabled: false
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 2Gi
+  readReplicas:
+    persistence:
+      enabled: false

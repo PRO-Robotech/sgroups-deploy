@@ -1,20 +1,39 @@
 PARENT_DIR     := $(abspath $(CURDIR)/..)
-IMAGE_BACKEND  := sgroups-backend:latest
+
+# Helm releases (also used as the in-cluster service / fullname for each chart)
+SGROUPS_RELEASE   := sgroups
+APISERVER_RELEASE := sgroups-k8s-api
+AGENT_RELEASE     := sgroups-agent
+
+SGROUPS_CHART     := deploy/charts/sgroups
+APISERVER_CHART   := deploy/charts/sgroups-k8s-api
+AGENT_CHART       := deploy/charts/sgroups-agent
+
+SGROUPS_VALUES    := deploy/values/sgroups.local.yaml
+APISERVER_VALUES  := deploy/values/sgroups-k8s-api.local.yaml
+AGENT_VALUES      := deploy/values/agent.local.yaml
+
+# Local image tags loaded into kind
+IMAGE_BACKEND   := sgroups-backend:latest
 IMAGE_MIGRATION := sgroups-migration:latest
 IMAGE_APISERVER := sgroups-k8s-apiserver:latest
-KIND_CLUSTER   := sgroups-dev
-NAMESPACE      := sgroups-system
+IMAGE_AGENT     := sgroups-agent:latest
+
+KIND_CLUSTER := sgroups-dev
+NAMESPACE    := sgroups-system
 
 CERT_MANAGER_VERSION := v1.17.2
 
 .PHONY: up down \
         kind-create kind-delete \
         cert-manager \
-        build build-backend build-migration build-apiserver \
+        build build-backend build-migration build-apiserver build-agent \
         load \
         deploy undeploy \
-        redeploy-backend redeploy-apiserver remigrate \
-        status logs-backend logs-apiserver \
+        deploy-sgroups deploy-apiserver deploy-agent \
+        undeploy-sgroups undeploy-apiserver undeploy-agent \
+        redeploy-backend redeploy-apiserver redeploy-agent \
+        status logs-backend logs-apiserver logs-agent \
         proxy port-forward-backend port-forward-postgres \
         check-proxy check-backend check-postgres \
         pg-connections \
@@ -51,16 +70,32 @@ cert-manager:
 
 # ─── Docker build ─────────────────────────────────────────────────
 
-build: build-backend build-migration build-apiserver
+build: build-backend build-migration build-apiserver build-agent
 
 build-backend:
-	docker build -f docker/backend.Dockerfile -t $(IMAGE_BACKEND) $(PARENT_DIR)
+	docker buildx build --load \
+		-f $(PARENT_DIR)/sgroups/Dockerfile.server \
+		-t $(IMAGE_BACKEND) \
+		$(PARENT_DIR)/sgroups
 
 build-migration:
-	docker build -f docker/migration.Dockerfile -t $(IMAGE_MIGRATION) $(PARENT_DIR)
+	docker buildx build --load \
+		-f $(PARENT_DIR)/sgroups/Dockerfile.goose \
+		-t $(IMAGE_MIGRATION) \
+		$(PARENT_DIR)/sgroups
 
 build-apiserver:
-	docker build -f docker/apiserver.Dockerfile -t $(IMAGE_APISERVER) $(PARENT_DIR)
+	docker buildx build --load \
+		--build-context sgroups-proto=$(PARENT_DIR)/sgroups-proto \
+		-f $(PARENT_DIR)/sgroups-k8s-api/apiserver.Dockerfile \
+		-t $(IMAGE_APISERVER) \
+		$(PARENT_DIR)/sgroups-k8s-api
+
+build-agent:
+	docker buildx build --load \
+		-f $(PARENT_DIR)/sgroups/Dockerfile.agent \
+		-t $(IMAGE_AGENT) \
+		$(PARENT_DIR)/sgroups
 
 # ─── Load images into Kind ────────────────────────────────────────
 
@@ -68,41 +103,65 @@ load:
 	kind load docker-image $(IMAGE_BACKEND) --name $(KIND_CLUSTER)
 	kind load docker-image $(IMAGE_MIGRATION) --name $(KIND_CLUSTER)
 	kind load docker-image $(IMAGE_APISERVER) --name $(KIND_CLUSTER)
+	kind load docker-image $(IMAGE_AGENT) --name $(KIND_CLUSTER)
 
-# ─── Deploy / Undeploy ────────────────────────────────────────────
+# ─── Deploy / Undeploy (helm) ─────────────────────────────────────
 
-deploy:
-	kubectl apply -k config/
-	@echo "Waiting for PostgreSQL..."
-	kubectl wait --for=condition=Ready pod -l app=sgroups-postgres -n $(NAMESPACE) --timeout=120s
-	@echo "Waiting for migration job..."
-	kubectl wait --for=condition=Complete job/sgroups-migration -n $(NAMESPACE) --timeout=120s
-	@echo "Waiting for backend rollout..."
-	kubectl rollout status deployment/sgroups-backend -n $(NAMESPACE) --timeout=120s
-	@echo "Waiting for apiserver rollout..."
-	kubectl rollout status deployment/sgroups-k8s-apiserver -n $(NAMESPACE) --timeout=120s
+deploy: deploy-sgroups deploy-apiserver deploy-agent
 	@echo "✓ All components deployed successfully."
 
-undeploy:
-	kubectl delete -k config/ --ignore-not-found
+undeploy: undeploy-agent undeploy-apiserver undeploy-sgroups
+	-kubectl delete namespace $(NAMESPACE) --ignore-not-found
+
+deploy-sgroups:
+	helm upgrade --install $(SGROUPS_RELEASE) $(SGROUPS_CHART) \
+		-n $(NAMESPACE) --create-namespace \
+		-f $(SGROUPS_VALUES) \
+		--wait --timeout 300s
+	@echo "✓ sgroups deployed."
+
+deploy-apiserver:
+	helm upgrade --install $(APISERVER_RELEASE) $(APISERVER_CHART) \
+		-n $(NAMESPACE) --create-namespace \
+		-f $(APISERVER_VALUES) \
+		--wait --timeout 180s
+	@echo "✓ sgroups-k8s-api deployed."
+
+deploy-agent:
+	helm upgrade --install $(AGENT_RELEASE) $(AGENT_CHART) \
+		-n $(NAMESPACE) --create-namespace \
+		-f $(AGENT_VALUES) \
+		--wait --timeout 180s
+	@echo "✓ sgroups-agent deployed."
+
+undeploy-sgroups:
+	-helm uninstall $(SGROUPS_RELEASE) -n $(NAMESPACE)
+
+undeploy-apiserver:
+	-helm uninstall $(APISERVER_RELEASE) -n $(NAMESPACE)
+
+undeploy-agent:
+	-helm uninstall $(AGENT_RELEASE) -n $(NAMESPACE)
 
 # ─── Selective redeploy ───────────────────────────────────────────
 
 redeploy-backend: build-backend
 	kind load docker-image $(IMAGE_BACKEND) --name $(KIND_CLUSTER)
-	kubectl rollout restart deployment/sgroups-backend -n $(NAMESPACE)
-	kubectl rollout status deployment/sgroups-backend -n $(NAMESPACE) --timeout=120s
+	$(MAKE) deploy-sgroups
+	kubectl rollout restart deployment/$(SGROUPS_RELEASE) -n $(NAMESPACE)
+	kubectl rollout status deployment/$(SGROUPS_RELEASE) -n $(NAMESPACE) --timeout=180s
 
 redeploy-apiserver: build-apiserver
 	kind load docker-image $(IMAGE_APISERVER) --name $(KIND_CLUSTER)
-	kubectl rollout restart deployment/sgroups-k8s-apiserver -n $(NAMESPACE)
-	kubectl rollout status deployment/sgroups-k8s-apiserver -n $(NAMESPACE) --timeout=120s
+	$(MAKE) deploy-apiserver
+	kubectl rollout restart deployment/$(APISERVER_RELEASE) -n $(NAMESPACE)
+	kubectl rollout status deployment/$(APISERVER_RELEASE) -n $(NAMESPACE) --timeout=180s
 
-remigrate: build-migration
-	kind load docker-image $(IMAGE_MIGRATION) --name $(KIND_CLUSTER)
-	-kubectl delete job/sgroups-migration -n $(NAMESPACE)
-	kubectl apply -k config/
-	kubectl wait --for=condition=Complete job/sgroups-migration -n $(NAMESPACE) --timeout=120s
+redeploy-agent: build-agent
+	kind load docker-image $(IMAGE_AGENT) --name $(KIND_CLUSTER)
+	$(MAKE) deploy-agent
+	kubectl rollout restart daemonset/$(AGENT_RELEASE) -n $(NAMESPACE)
+	kubectl rollout status daemonset/$(AGENT_RELEASE) -n $(NAMESPACE) --timeout=180s
 
 # ─── Observability ────────────────────────────────────────────────
 
@@ -110,10 +169,13 @@ status:
 	kubectl -n $(NAMESPACE) get all
 
 logs-backend:
-	kubectl logs -f deployment/sgroups-backend -n $(NAMESPACE)
+	kubectl logs -f deployment/$(SGROUPS_RELEASE) -n $(NAMESPACE)
 
 logs-apiserver:
-	kubectl logs -f deployment/sgroups-k8s-apiserver -n $(NAMESPACE)
+	kubectl logs -f deployment/$(APISERVER_RELEASE) -n $(NAMESPACE)
+
+logs-agent:
+	kubectl logs -f daemonset/$(AGENT_RELEASE) -n $(NAMESPACE) -c agent
 
 # ─── Access ───────────────────────────────────────────────────────
 #
@@ -131,11 +193,11 @@ proxy:
 
 port-forward-backend:
 	@echo "gRPC/HTTP backend on localhost:9006"
-	kubectl port-forward svc/sgroups-backend 9006:9006 -n $(NAMESPACE)
+	kubectl port-forward svc/$(SGROUPS_RELEASE) 9006:9006 -n $(NAMESPACE)
 
 port-forward-postgres:
 	@echo "PostgreSQL on localhost:15432"
-	kubectl port-forward svc/sgroups-postgres 15432:5432 -n $(NAMESPACE)
+	kubectl port-forward svc/$(SGROUPS_RELEASE)-postgresql 15432:5432 -n $(NAMESPACE)
 
 # ─── Connection checks (run in a separate terminal while port-forward is active)
 
@@ -155,8 +217,8 @@ check-postgres:
 		|| echo "✗ postgres not reachable on port 15432"
 
 pg-connections:
-	@kubectl exec -n $(NAMESPACE) sgroups-postgres-0 -- \
-		psql -U user_admin -d sgroups -c \
+	@kubectl exec -n $(NAMESPACE) $(SGROUPS_RELEASE)-postgresql-0 -- \
+		env PGPASSWORD=sgroups psql -U sgroups -d sgroups -c \
 		"SELECT pid, state, left(query,60) AS query, age(now(), backend_start) AS uptime FROM pg_stat_activity WHERE datname = 'sgroups' AND pid <> pg_backend_pid() ORDER BY backend_start;"
 
 # ─── Tests ────────────────────────────────────────────────────────

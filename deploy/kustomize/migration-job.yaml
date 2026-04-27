@@ -25,10 +25,10 @@ spec:
           image: sgroups-migration:latest
           imagePullPolicy: IfNotPresent
           command:
-            - goose
+            - /app/bin/goose
             - -table=sg_db_ver
             - -dir
-            - /migrations
+            - /app
             - postgres
             - "postgres://user_admin:qwerty@sgroups-postgres.sgroups-system.svc:5432/sgroups?sslmode=disable"
             - up

@@ -1,0 +1,11 @@
+fullnameOverride: sgroups-k8s-api
+nameOverride: sgroups-k8s-api
+
+image:
+  repository: sgroups-k8s-apiserver
+  tag: latest
+  pullPolicy: IfNotPresent
+
+config:
+  grpc:
+    address: sgroups.sgroups-system.svc:9006
