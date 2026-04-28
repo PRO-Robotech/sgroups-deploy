@@ -9,10 +9,10 @@ imagePullPolicy: IfNotPresent
 image:
   backend:
     repository: prorobotech/sgroups-server
-    tag: feature-cloud-498-services-ca87575f
+    tag: release-0.1.0-rc.1-811df50e
   migration:
     repository: prorobotech/sgroups-goose
-    tag: feature-cloud-498-services-ca87575f
+    tag: release-0.1.0-rc.1-811df50e
   apiserver:
     repository: prorobotech/sgroups-k8s-api
     tag: feature-INIT-fix-apply-700211fb
