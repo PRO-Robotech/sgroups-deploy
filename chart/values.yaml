@@ -15,7 +15,7 @@ image:
     tag: feature-cloud-498-services-ca87575f
   apiserver:
     repository: prorobotech/sgroups-k8s-api
-    tag: feature-cloud-498-services-e69ba481
+    tag: feature-INIT-fix-apply-700211fb
   postgres:
     repository: postgres
     tag: 16-alpine
