@@ -45,6 +45,13 @@ web:
   # прячет футер
   #  HIDE_FOOTER: true
 
+moduleRbac:
+  enabled: true
+  env:
+    CORS_ALLOWED_ORIGINS: "http://localhost:8081"
+    BASEPREFIX: /openapi-ui-plugin-rbac
+
+
 moduleSgroups:
   env:
     CORS_ALLOWED_ORIGINS: "http://localhost:8081"

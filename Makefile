@@ -1,22 +1,22 @@
 PARENT_DIR     := $(abspath $(CURDIR)/..)
 
 # Helm releases (also used as the in-cluster service / fullname for each chart)
-SGROUPS_RELEASE   := sgroups
-APISERVER_RELEASE := sgroups-k8s-api
-AGENT_RELEASE     := sgroups-agent
+SGROUPS_RELEASE   	:= sgroups
+APISERVER_RELEASE 	:= sgroups-k8s-api
+AGENT_RELEASE     	:= sgroups-agent
+INCLOUD_WEB_RELEASE	:= incloud-web
 
-SGROUPS_CHART     := deploy/charts/sgroups
-APISERVER_CHART   := deploy/charts/sgroups-k8s-api
-AGENT_CHART       := deploy/charts/sgroups-agent
-
-SGROUPS_VALUES    := deploy/values/sgroups.local.yaml
-APISERVER_VALUES  := deploy/values/sgroups-k8s-api.local.yaml
-AGENT_VALUES      := deploy/values/agent.local.yaml
-
-INCLOUD_WEB_RELEASE := incloud-web
+SGROUPS_CHART     	:= deploy/charts/sgroups
+APISERVER_CHART   	:= deploy/charts/sgroups-k8s-api
+AGENT_CHART       	:= deploy/charts/sgroups-agent
 INCLOUD_WEB_CHART   := oci://registry-1.docker.io/prorobotech/incloud-web-chart
-INCLOUD_WEB_VERSION := 1.5.0-rc1-3e32b82
+
+SGROUPS_VALUES    	:= deploy/values/sgroups.local.yaml
+APISERVER_VALUES  	:= deploy/values/sgroups-k8s-api.local.yaml
+AGENT_VALUES      	:= deploy/values/agent.local.yaml
 INCLOUD_WEB_VALUES  := deploy/values/in-cloud-web.local.yaml
+
+INCLOUD_WEB_VERSION := 1.5.0-rc1-3e32b82
 
 # Local image tags loaded into kind
 IMAGE_BACKEND   := sgroups-backend:latest
