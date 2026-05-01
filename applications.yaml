@@ -112,3 +112,148 @@ spec:
     syncOptions:
     - CreateNamespace=true
     - Replace=true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: incloud-web
+  namespace: in-cloud-argocd
+spec:
+  destination:
+    namespace: in-cloud-web
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      values: |
+        replicaCount: 2
+        oauth2-proxy:
+          enabled: false
+
+        navigation:
+          pathToNavigateFromClusterListResource: "/openapi-ui/{reqsJsonPath[0]['.metadata.name']['-']}/plugins/plugin-sgroups/hosts"
+          pathToNavigateFromClusterList: "/openapi-ui/~recordValue~/plugins/plugin-sgroups/hosts"
+
+        incloud-web-resources:
+          enabled: false
+        fullnameOverride: in-cloud-web
+        externalDomain: localhost
+        service:
+          enabled: true
+          type: ClusterIP
+          ports:
+            - name: web-http
+              port: 8080
+              targetPort: 8080
+              protocol: TCP
+            - name: nginx-http
+              port: 8081
+              targetPort: 8081
+              protocol: TCP
+            - name: bff-http
+              port: 8082
+              targetPort: 8082
+              protocol: TCP
+            - name: rbac-http
+              port: 8084
+              targetPort: 8084
+              protocol: TCP
+            - name: sgroups-http
+              port: 8085
+              targetPort: 8085
+              protocol: TCP
+        bff:
+          env:
+            BASE_ALLOWED_AUTH_HEADERS: "user-agent,accept,content-type,origin,referer,accept-encoding,cookie,authorization"
+
+        web:
+          env:
+            NAVIGATE_FROM_CLUSTERLIST: "/openapi-ui/~recordValue~/plugins/plugin-sgroups/hosts"
+          # прячет футер
+          #  HIDE_FOOTER: true
+
+        clusters:
+          - name: default
+            description: default
+            tenant: dev
+            scheme: https
+            api: localhost
+
+        expose:
+          enabled: false
+
+        sidebars:
+          cluster:
+            customItems:
+              - children:
+                  - key: rules
+                    label: Rules
+                    link: /openapi-ui/{cluster}/plugins/plugin-sgroups/rules
+                  - key: hosts
+                    label: Hosts
+                    link: /openapi-ui/{cluster}/plugins/plugin-sgroups/hosts
+                  - key: networks
+                    label: Networks
+                    link: /openapi-ui/{cluster}/plugins/plugin-sgroups/networks
+                  - key: addressgroups
+                    label: AddressGroups
+                    link: /openapi-ui/{cluster}/plugins/plugin-sgroups/addressgroups
+                  - key: services
+                    label: Services
+                    link: /openapi-ui/{cluster}/plugins/plugin-sgroups/services
+                key: hbf
+                label: HBF
+            home:
+              enabled: true
+            workloads:
+              enabled: false
+            networking:
+              enabled: false
+            storage:
+              enabled: false
+            compute:
+              enabled: false
+            administration:
+              enabled: false
+
+          namespaced:
+            customItems:
+              - children:
+                  - key: rules
+                    label: Rules
+                    link: /openapi-ui/{cluster}/{namespace}/plugins/plugin-sgroups/rules
+                  - key: hosts
+                    label: Hosts
+                    link: /openapi-ui/{cluster}/{namespace}/plugins/plugin-sgroups/hosts
+                  - key: networks
+                    label: Networks
+                    link: /openapi-ui/{cluster}/{namespace}/plugins/plugin-sgroups/networks
+                  - key: addressgroups
+                    label: AddressGroups
+                    link: /openapi-ui/{cluster}/{namespace}/plugins/plugin-sgroups/addressgroups
+                  - key: services
+                    label: Services
+                    link: /openapi-ui/{cluster}/{namespace}/plugins/plugin-sgroups/services
+                key: hbf
+                label: HBF
+            home:
+              enabled: true
+            workloads:
+              enabled: false
+            networking:
+              enabled: false
+            storage:
+              enabled: false
+            compute:
+              enabled: false
+            administration:
+              enabled: false
+    path: .
+    repoURL: https://github.com/PRO-Robotech/incloud-web-chart.git
+    targetRevision: release/1.5.0-rc1
+  syncPolicy:
+    automated:
+      enabled: true
+    syncOptions:
+    - CreateNamespace=true

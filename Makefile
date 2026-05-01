@@ -13,6 +13,11 @@ SGROUPS_VALUES    := deploy/values/sgroups.local.yaml
 APISERVER_VALUES  := deploy/values/sgroups-k8s-api.local.yaml
 AGENT_VALUES      := deploy/values/agent.local.yaml
 
+INCLOUD_WEB_RELEASE := incloud-web
+INCLOUD_WEB_CHART   := oci://registry-1.docker.io/prorobotech/incloud-web-chart
+INCLOUD_WEB_VERSION := 1.5.0-rc1-3e32b82
+INCLOUD_WEB_VALUES  := deploy/values/in-cloud-web.local.yaml
+
 # Local image tags loaded into kind
 IMAGE_BACKEND   := sgroups-backend:latest
 IMAGE_MIGRATION := sgroups-migration:latest
@@ -30,10 +35,10 @@ CERT_MANAGER_VERSION := v1.17.2
         build build-backend build-migration build-apiserver build-agent \
         load \
         deploy undeploy \
-        deploy-sgroups deploy-apiserver deploy-agent \
-        undeploy-sgroups undeploy-apiserver undeploy-agent \
+        deploy-sgroups deploy-apiserver deploy-agent deploy-incloud-web \
+        undeploy-sgroups undeploy-apiserver undeploy-agent undeploy-incloud-web \
         redeploy-backend redeploy-apiserver redeploy-agent \
-        status logs-backend logs-apiserver logs-agent \
+        status logs-backend logs-apiserver logs-agent logs-incloud-web \
         proxy port-forward-backend port-forward-postgres \
         check-proxy check-backend check-postgres \
         pg-connections \
@@ -107,10 +112,10 @@ load:
 
 # ─── Deploy / Undeploy (helm) ─────────────────────────────────────
 
-deploy: deploy-sgroups deploy-apiserver deploy-agent
+deploy: deploy-sgroups deploy-apiserver deploy-agent deploy-incloud-web
 	@echo "✓ All components deployed successfully."
 
-undeploy: undeploy-agent undeploy-apiserver undeploy-sgroups
+undeploy: undeploy-incloud-web undeploy-agent undeploy-apiserver undeploy-sgroups
 	-kubectl delete namespace $(NAMESPACE) --ignore-not-found
 
 deploy-sgroups:
@@ -134,6 +139,14 @@ deploy-agent:
 		--wait --timeout 180s
 	@echo "✓ sgroups-agent deployed."
 
+deploy-incloud-web:
+	helm upgrade --install $(INCLOUD_WEB_RELEASE) $(INCLOUD_WEB_CHART) \
+		--version $(INCLOUD_WEB_VERSION) \
+		-n $(NAMESPACE) --create-namespace \
+		-f $(INCLOUD_WEB_VALUES) \
+		--wait --timeout 180s
+	@echo "✓ incloud-web deployed."
+
 undeploy-sgroups:
 	-helm uninstall $(SGROUPS_RELEASE) -n $(NAMESPACE)
 
@@ -142,6 +155,9 @@ undeploy-apiserver:
 
 undeploy-agent:
 	-helm uninstall $(AGENT_RELEASE) -n $(NAMESPACE)
+
+undeploy-incloud-web:
+	-helm uninstall $(INCLOUD_WEB_RELEASE) -n $(NAMESPACE)
 
 # ─── Selective redeploy ───────────────────────────────────────────
 
@@ -176,6 +192,9 @@ logs-apiserver:
 
 logs-agent:
 	kubectl logs -f daemonset/$(AGENT_RELEASE) -n $(NAMESPACE) -c agent
+
+logs-incloud-web:
+	kubectl logs -f deployment/$(INCLOUD_WEB_RELEASE) -n $(NAMESPACE)
 
 # ─── Access ───────────────────────────────────────────────────────
 #
