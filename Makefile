@@ -35,8 +35,8 @@ CERT_MANAGER_VERSION := v1.17.2
         build build-backend build-migration build-apiserver build-agent \
         load \
         deploy undeploy \
-        deploy-sgroups deploy-apiserver deploy-agent deploy-incloud-web \
-        undeploy-sgroups undeploy-apiserver undeploy-agent undeploy-incloud-web \
+        deploy-sgroups deploy-apiserver deploy-agent deploy-incloud-web deploy-incloud-web-rbac \
+        undeploy-sgroups undeploy-apiserver undeploy-agent undeploy-incloud-web undeploy-incloud-web-rbac \
         redeploy-backend redeploy-apiserver redeploy-agent \
         status logs-backend logs-apiserver logs-agent logs-incloud-web \
         proxy port-forward-backend port-forward-postgres \
@@ -139,13 +139,16 @@ deploy-agent:
 		--wait --timeout 180s
 	@echo "✓ sgroups-agent deployed."
 
-deploy-incloud-web:
+deploy-incloud-web: deploy-incloud-web-rbac
 	helm upgrade --install $(INCLOUD_WEB_RELEASE) $(INCLOUD_WEB_CHART) \
 		--version $(INCLOUD_WEB_VERSION) \
 		-n $(NAMESPACE) --create-namespace \
 		-f $(INCLOUD_WEB_VALUES) \
 		--wait --timeout 180s
 	@echo "✓ incloud-web deployed."
+
+deploy-incloud-web-rbac:
+	kubectl apply -f deploy/k8s/incloud-web-rbac.yaml
 
 undeploy-sgroups:
 	-helm uninstall $(SGROUPS_RELEASE) -n $(NAMESPACE)
@@ -158,6 +161,10 @@ undeploy-agent:
 
 undeploy-incloud-web:
 	-helm uninstall $(INCLOUD_WEB_RELEASE) -n $(NAMESPACE)
+	-$(MAKE) undeploy-incloud-web-rbac
+
+undeploy-incloud-web-rbac:
+	-kubectl delete -f deploy/k8s/incloud-web-rbac.yaml --ignore-not-found
 
 # ─── Selective redeploy ───────────────────────────────────────────
 
