@@ -125,6 +125,9 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
+    path: .
+    repoURL: https://github.com/PRO-Robotech/incloud-web-chart.git
+    targetRevision: release/1.5.0-rc1
     helm:
       values: |
         replicaCount: 2
@@ -249,9 +252,31 @@ spec:
               enabled: false
             administration:
               enabled: false
-    path: .
-    repoURL: https://github.com/PRO-Robotech/incloud-web-chart.git
-    targetRevision: release/1.5.0-rc1
+  syncPolicy:
+    automated:
+      enabled: true
+    syncOptions:
+    - CreateNamespace=true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: incloud-k8s-rbac-engine
+  namespace: in-cloud-argocd
+spec:
+  destination:
+    namespace: in-cloud-k8s-rbac-engine
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: k8s-rbac-engine-chart
+    repoURL: registry-1.docker.io/prorobotech
+    targetRevision: 0.1.0-7833907
+    helm:
+      values: |
+        nameOverride: k8s-rbac-engine
+        fullnameOverride: k8s-rbac-engine
   syncPolicy:
     automated:
       enabled: true

@@ -1,22 +1,26 @@
 PARENT_DIR     := $(abspath $(CURDIR)/..)
 
 # Helm releases (also used as the in-cluster service / fullname for each chart)
-SGROUPS_RELEASE   	:= sgroups
-APISERVER_RELEASE 	:= sgroups-k8s-api
-AGENT_RELEASE     	:= sgroups-agent
-INCLOUD_WEB_RELEASE	:= incloud-web
+SGROUPS_RELEASE     := sgroups
+APISERVER_RELEASE   := sgroups-k8s-api
+AGENT_RELEASE       := sgroups-agent
+INCLOUD_WEB_RELEASE := incloud-web
+RBAC_ENGINE_RELEASE := k8s-rbac-engine
 
-SGROUPS_CHART     	:= deploy/charts/sgroups
-APISERVER_CHART   	:= deploy/charts/sgroups-k8s-api
-AGENT_CHART       	:= deploy/charts/sgroups-agent
+SGROUPS_CHART       := deploy/charts/sgroups
+APISERVER_CHART     := deploy/charts/sgroups-k8s-api
+AGENT_CHART         := deploy/charts/sgroups-agent
 INCLOUD_WEB_CHART   := oci://registry-1.docker.io/prorobotech/incloud-web-chart
+RBAC_ENGINE_CHART   := oci://registry-1.docker.io/prorobotech/k8s-rbac-engine-chart
 
-SGROUPS_VALUES    	:= deploy/values/sgroups.local.yaml
-APISERVER_VALUES  	:= deploy/values/sgroups-k8s-api.local.yaml
-AGENT_VALUES      	:= deploy/values/agent.local.yaml
+SGROUPS_VALUES      := deploy/values/sgroups.local.yaml
+APISERVER_VALUES    := deploy/values/sgroups-k8s-api.local.yaml
+AGENT_VALUES        := deploy/values/agent.local.yaml
 INCLOUD_WEB_VALUES  := deploy/values/in-cloud-web.local.yaml
+RBAC_ENGINE_VALUES  := deploy/values/k8s-rbac-engine.local.yaml
 
 INCLOUD_WEB_VERSION := 1.5.0-rc1-3e32b82
+RBAC_ENGINE_VERSION := 0.1.0-7833907
 
 # Local image tags loaded into kind
 IMAGE_BACKEND   := sgroups-backend:latest
@@ -35,10 +39,10 @@ CERT_MANAGER_VERSION := v1.17.2
         build build-backend build-migration build-apiserver build-agent \
         load \
         deploy undeploy \
-        deploy-sgroups deploy-apiserver deploy-agent deploy-incloud-web deploy-incloud-web-rbac \
-        undeploy-sgroups undeploy-apiserver undeploy-agent undeploy-incloud-web undeploy-incloud-web-rbac \
-        redeploy-backend redeploy-apiserver redeploy-agent \
-        status logs-backend logs-apiserver logs-agent logs-incloud-web \
+        deploy-sgroups deploy-apiserver deploy-agent deploy-incloud-web deploy-incloud-web-rbac deploy-rbac-engine \
+        undeploy-sgroups undeploy-apiserver undeploy-agent undeploy-incloud-web undeploy-incloud-web-rbac undeploy-rbac-engine \
+        redeploy-backend redeploy-apiserver redeploy-agent redeploy-rbac-engine \
+        status logs-backend logs-apiserver logs-agent logs-incloud-web logs-rbac-engine \
         proxy port-forward-backend port-forward-postgres \
         check-proxy check-backend check-postgres \
         pg-connections \
@@ -112,10 +116,10 @@ load:
 
 # ─── Deploy / Undeploy (helm) ─────────────────────────────────────
 
-deploy: deploy-sgroups deploy-apiserver deploy-agent deploy-incloud-web
+deploy: deploy-sgroups deploy-apiserver deploy-agent deploy-incloud-web deploy-rbac-engine
 	@echo "✓ All components deployed successfully."
 
-undeploy: undeploy-incloud-web undeploy-agent undeploy-apiserver undeploy-sgroups
+undeploy: undeploy-rbac-engine undeploy-incloud-web undeploy-agent undeploy-apiserver undeploy-sgroups
 	-kubectl delete namespace $(NAMESPACE) --ignore-not-found
 
 deploy-sgroups:
@@ -150,6 +154,14 @@ deploy-incloud-web: deploy-incloud-web-rbac
 deploy-incloud-web-rbac:
 	kubectl apply -f deploy/k8s/incloud-web-rbac.yaml
 
+deploy-rbac-engine:
+	helm upgrade --install $(RBAC_ENGINE_RELEASE) $(RBAC_ENGINE_CHART) \
+		--version $(RBAC_ENGINE_VERSION) \
+		-n $(NAMESPACE) --create-namespace \
+		-f $(RBAC_ENGINE_VALUES) \
+		--wait --timeout 180s
+	@echo "✓ k8s-rbac-engine deployed."
+
 undeploy-sgroups:
 	-helm uninstall $(SGROUPS_RELEASE) -n $(NAMESPACE)
 
@@ -165,6 +177,9 @@ undeploy-incloud-web:
 
 undeploy-incloud-web-rbac:
 	-kubectl delete -f deploy/k8s/incloud-web-rbac.yaml --ignore-not-found
+
+undeploy-rbac-engine:
+	-helm uninstall $(RBAC_ENGINE_RELEASE) -n $(NAMESPACE)
 
 # ─── Selective redeploy ───────────────────────────────────────────
 
@@ -186,6 +201,12 @@ redeploy-agent: build-agent
 	kubectl rollout restart daemonset/$(AGENT_RELEASE) -n $(NAMESPACE)
 	kubectl rollout status daemonset/$(AGENT_RELEASE) -n $(NAMESPACE) --timeout=180s
 
+redeploy-rbac-engine: build-rbac-engine
+	kind load docker-image $(IMAGE_RBAC_ENGINE) --name $(KIND_CLUSTER)
+	$(MAKE) deploy-rbac-engine
+	kubectl rollout restart deployment/$(RBAC_ENGINE_RELEASE) -n $(NAMESPACE)
+	kubectl rollout status deployment/$(RBAC_ENGINE_RELEASE) -n $(NAMESPACE) --timeout=180s
+
 # ─── Observability ────────────────────────────────────────────────
 
 status:
@@ -202,6 +223,9 @@ logs-agent:
 
 logs-incloud-web:
 	kubectl logs -f deployment/$(INCLOUD_WEB_RELEASE) -n $(NAMESPACE)
+
+logs-rbac-engine:
+	kubectl logs -f deployment/$(RBAC_ENGINE_RELEASE) -n $(NAMESPACE)
 
 # ─── Access ───────────────────────────────────────────────────────
 #
