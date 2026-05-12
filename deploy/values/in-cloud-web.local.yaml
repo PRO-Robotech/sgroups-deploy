@@ -1,0 +1,272 @@
+replicaCount: 1
+oauth2-proxy:
+  enabled: false
+
+navigation:
+  pathToNavigateFromClusterListResource: "/openapi-ui/{reqsJsonPath[0]['.metadata.name']['-']}/api-table/sgroups.io/v1alpha1/tenants"
+  pathToNavigateFromClusterList: "/openapi-ui/~recordValue~/api-table/sgroups.io/v1alpha1/tenants"
+
+incloud-web-resources:
+  enabled: false
+fullnameOverride: in-cloud-web
+externalDomain: localhost
+service:
+  enabled: true
+  type: NodePort
+  ports:
+    - name: web-http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    - name: nginx-http
+      port: 8081
+      targetPort: 8081
+      nodePort: 30081
+      protocol: TCP
+    - name: bff-http
+      port: 8082
+      targetPort: 8082
+      protocol: TCP
+    - name: rbac-http
+      port: 8084
+      targetPort: 8084
+      protocol: TCP
+    - name: sgroups-http
+      port: 8085
+      targetPort: 8085
+      protocol: TCP
+bff:
+  env:
+    BASE_ALLOWED_AUTH_HEADERS: "user-agent,accept,content-type,origin,referer,accept-encoding,cookie,authorization"
+
+web:
+  env:
+    NAVIGATE_FROM_CLUSTERLIST: "/openapi-ui/~recordValue~/api-table/sgroups.io/v1alpha1/tenants"
+  # прячет футер
+  #  HIDE_FOOTER: true
+
+moduleRbac:
+  enabled: true
+  env:
+    CORS_ALLOWED_ORIGINS: "http://localhost:8081"
+    BASEPREFIX: /openapi-ui-plugin-rbac
+
+
+moduleSgroups:
+  env:
+    CORS_ALLOWED_ORIGINS: "http://localhost:8081"
+    BASEPREFIX: /openapi-ui-plugin-sgroups
+
+clusters:
+  - name: default
+    description: default
+    tenant: dev
+    scheme: https
+    api: localhost
+
+expose:
+  enabled: false
+
+sidebars:
+  cluster:
+    customItems:
+      - children:
+          - key: tenants
+            label: Tenants
+            link: /openapi-ui/{cluster}/api-table/sgroups.io/v1alpha1/tenants
+          - key: rules
+            label: Rules
+            link: /openapi-ui/{cluster}/plugins/plugin-sgroups/rules
+          - key: hosts
+            label: Hosts
+            link: /openapi-ui/{cluster}/plugins/plugin-sgroups/hosts
+          - key: networks
+            label: Networks
+            link: /openapi-ui/{cluster}/plugins/plugin-sgroups/networks
+          - key: addressgroups
+            label: AddressGroups
+            link: /openapi-ui/{cluster}/plugins/plugin-sgroups/addressgroups
+          - key: services
+            label: Services
+            link: /openapi-ui/{cluster}/plugins/plugin-sgroups/services
+        key: hbf
+        label: HBF
+    home:
+      enabled: true
+    workloads:
+      enabled: false
+    networking:
+      enabled: false
+    storage:
+      enabled: false
+    compute:
+      enabled: false
+    administration:
+      enabled: false
+
+  namespaced:
+    customItems:
+      - children:
+          - key: tenants
+            label: Tenants
+            link: /openapi-ui/{cluster}/api-table/sgroups.io/v1alpha1/tenants
+          - key: rules
+            label: Rules
+            link: /openapi-ui/{cluster}/{namespace}/plugins/plugin-sgroups/rules
+          - key: hosts
+            label: Hosts
+            link: /openapi-ui/{cluster}/{namespace}/plugins/plugin-sgroups/hosts
+          - key: networks
+            label: Networks
+            link: /openapi-ui/{cluster}/{namespace}/plugins/plugin-sgroups/networks
+          - key: addressgroups
+            label: AddressGroups
+            link: /openapi-ui/{cluster}/{namespace}/plugins/plugin-sgroups/addressgroups
+          - key: services
+            label: Services
+            link: /openapi-ui/{cluster}/{namespace}/plugins/plugin-sgroups/services
+        key: hbf
+        label: HBF
+    home:
+      enabled: true
+    workloads:
+      enabled: false
+    networking:
+      enabled: false
+    storage:
+      enabled: false
+    compute:
+      enabled: false
+    administration:
+      enabled: false
+
+extraObjects:
+  - apiVersion: front.in-cloud.io/v1alpha1
+    kind: CustomColumnsOverride
+    metadata:
+      name: stock-cluster-tenant
+    spec:
+      additionalPrinterColumns:
+        - jsonPath: .spec.displayName
+          name: Display Name
+          type: factory
+          customProps:
+            disableEventBubbling: true
+            items:
+            - type: antdFlex
+              data:
+                id: resource-badge-link-row
+                direction: row
+                align: center
+                gap: 6
+              children:
+                - type: ResourceBadge
+                  data:
+                    id: example-resource-badge
+                    value: Tenant
+                - type: antdLink
+                  data:
+                    id: name-link
+                    text: "{reqsJsonPath[0]['.spec.displayName']['Display name not set']}"
+                    href: "/{1}/{2}/{reqsJsonPath[0]['.metadata.name']}/plugins/plugin-sgroups/hosts"
+
+        - jsonPath: .metadata.name
+          name: Name
+
+        - name: Description
+          jsonPath: .spec.description
+          type: factory
+          customProps:
+            disableEventBubbling: true
+            items:
+              - type: parsedText
+                data:
+                  id: name-postfix
+                  text: '{reqsJsonPath[0][".spec.description"]["-"]}'
+                  style:
+                    display: block
+                    width: "300px"
+
+        - name: Comment
+          jsonPath: .spec.comment
+          type: factory
+          customProps:
+            disableEventBubbling: true
+            items:
+              - type: parsedText
+                data:
+                  id: name-postfix
+                  text: '{reqsJsonPath[0][".spec.comment"]["-"]}'
+                  style:
+                    display: block
+                    width: "300px"
+
+        - jsonPath: .metadata.creationTimestamp
+          name: Created
+          type: factory
+          customProps:
+            disableEventBubbling: true
+            items:
+            - type: antdFlex
+              data:
+                id: time-block
+                align: center
+                gap: 6
+              children:
+                - type: antdText
+                  data:
+                    id: time-icon
+                    text: "🌐"
+                - type: parsedText
+                  data:
+                    id: time-value
+                    text: "{reqsJsonPath[0]['.metadata.creationTimestamp']['-']}"
+                    formatter: timestamp
+      additionalPrinterColumnsTrimLengths:
+        - key: Name
+          value: 64
+      additionalPrinterColumnsUndefinedValues:
+        - key: Description
+          value: "-"
+        - key: Comment
+          value: "-"
+      id: "stock-cluster-/sgroups.io/v1alpha1/tenants"
+
+  - apiVersion: front.in-cloud.io/v1alpha1
+    kind: CustomFormsOverride
+    metadata:
+      name: sgroups.io.v1alpha1.tenants
+    spec:
+      hidden:
+        - - apiVersion
+        - - kind
+        - - status
+        - - metadata
+          - creationTimestamp
+        - - metadata
+          - deletionGracePeriodSeconds
+        - - metadata
+          - deletionTimestamp
+        - - metadata
+          - annotations
+        - - metadata
+          - ownerReferences
+        - - metadata
+          - resourceVersion
+        - - metadata
+          - uid
+        - - metadata
+          - finalizers
+        - - metadata
+          - generation
+        - - metadata
+          - generateName
+        - - metadata
+          - managedFields
+        - - metadata
+          - selfLink
+        - - metadata
+          - namespace
+        - - metadata
+          - labels
+      customizationId: default-/sgroups.io/v1alpha1/tenants
