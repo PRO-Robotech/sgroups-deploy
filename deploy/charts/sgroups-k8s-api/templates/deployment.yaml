@@ -46,19 +46,19 @@ spec:
             - --config=/etc/sgroups/config/config.yaml
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ .Values.service.ports.apiserver }}
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /healthz
-              port: {{ .Values.service.port }}
+              port: {{ .Values.service.ports.apiserver }}
               scheme: HTTPS
             initialDelaySeconds: 15
             periodSeconds: 20
           readinessProbe:
             httpGet:
               path: /healthz
-              port: {{ .Values.service.port }}
+              port: {{ .Values.service.ports.apiserver }}
               scheme: HTTPS
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -77,6 +77,41 @@ spec:
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+        {{- if .Values.controller.enabled }}
+        - name: controller
+          {{- with .Values.controller.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          args:
+            - --leader-elect=true
+            - --leader-election-id=sgroups-tenant-namespace-controller
+            - --leader-election-namespace={{ .Release.Namespace }}
+            - --metrics-bind-address=:{{ .Values.service.ports.controllerMetrics }}
+            - --health-probe-bind-address=:8081
+            - --v=2
+          ports:
+            - name: controller-metrics
+              containerPort: {{ .Values.service.ports.controllerMetrics }}
+          {{- with .Values.controller.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          readinessProbe: 
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 20
+        {{- end }}
       volumes:
         - name: certificates
           secret:

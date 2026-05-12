@@ -1,0 +1,24 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "sgroups-k8s-api.fullname" . }}-viewer
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+    {{- include "sgroups-k8s-api.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - sgroups.io
+    resources:
+      - addressgroups
+      - hosts
+      - networks
+      - rules
+      - services
+      - tenants
+    verbs:
+      - get
+      - list
+      - watch
+
+
