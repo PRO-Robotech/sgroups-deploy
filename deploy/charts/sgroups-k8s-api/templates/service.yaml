@@ -11,9 +11,9 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-    - port: {{ .Values.service.ports.controllerMetrics }}
-      targetPort: controller-metrics
+    - port: {{ .Values.service.ports.controller }}
+      targetPort: controller
       protocol: TCP
-      name: controller-metrics
+      name: controller
   selector:
     {{- include "sgroups-k8s-api.selectorLabels" . | nindent 4 }}

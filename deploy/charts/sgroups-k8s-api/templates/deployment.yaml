@@ -89,12 +89,12 @@ spec:
             - --leader-elect=true
             - --leader-election-id=sgroups-tenant-namespace-controller
             - --leader-election-namespace={{ .Release.Namespace }}
-            - --metrics-bind-address=:{{ .Values.service.ports.controllerMetrics }}
+            - --metrics-bind-address=:{{ .Values.service.ports.controller }}
             - --health-probe-bind-address=:8081
             - --v=2
           ports:
-            - name: controller-metrics
-              containerPort: {{ .Values.service.ports.controllerMetrics }}
+            - name: controller
+              containerPort: {{ .Values.service.ports.controller }}
           {{- with .Values.controller.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

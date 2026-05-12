@@ -53,7 +53,7 @@ service:
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   ports:
     apiserver: 8443
-    controllerMetrics: 8080
+    controller: 8080
 
 resources:
   limits:

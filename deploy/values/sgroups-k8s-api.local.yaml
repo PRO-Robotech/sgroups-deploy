@@ -6,6 +6,12 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
+controller:
+  image:
+    repository: sgroups-k8s-controller
+    tag: latest
+    pullPolicy: IfNotPresent
+
 config:
   grpc:
     address: sgroups.sgroups-system.svc:9006
