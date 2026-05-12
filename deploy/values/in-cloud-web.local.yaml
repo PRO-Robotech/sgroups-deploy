@@ -163,7 +163,7 @@ extraObjects:
                 - type: ResourceBadge
                   data:
                     id: example-resource-badge
-                    value: Hosts
+                    value: Tenant
                 - type: antdLink
                   data:
                     id: name-link
