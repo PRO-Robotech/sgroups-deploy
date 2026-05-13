@@ -1,6 +1,9 @@
 fullnameOverride: sgroups-agent
 nameOverride: sgroups-agent
 
+type: Deployment  # DaemonSet
+replicaCount: 1   # Agent replicas count
+
 agent:
   image:
     repository: sgroups-agent
