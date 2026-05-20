@@ -13,6 +13,6 @@ spec:
   service:
     name: {{ include "sgroups-k8s-api.fullname" . }}
     namespace: {{ .Release.Namespace }}
-    port: {{ .Values.service.port }}
+    port: {{ .Values.service.ports.apiserver }}
   version: v1alpha1
   versionPriority: 15

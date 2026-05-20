@@ -71,9 +71,6 @@ sidebars:
   cluster:
     customItems:
       - children:
-          - key: tenants
-            label: Tenants
-            link: /openapi-ui/{cluster}/api-table/sgroups.io/v1alpha1/tenants
           - key: rules
             label: Rules
             link: /openapi-ui/{cluster}/plugins/plugin-sgroups/rules
@@ -93,6 +90,10 @@ sidebars:
         label: HBF
     home:
       enabled: true
+      extraItems:
+        - key: tenants
+          label: Tenants
+          link: /openapi-ui/{cluster}/api-table/sgroups.io/v1alpha1/tenants
     workloads:
       enabled: false
     networking:
@@ -107,9 +108,6 @@ sidebars:
   namespaced:
     customItems:
       - children:
-          - key: tenants
-            label: Tenants
-            link: /openapi-ui/{cluster}/api-table/sgroups.io/v1alpha1/tenants
           - key: rules
             label: Rules
             link: /openapi-ui/{cluster}/{namespace}/plugins/plugin-sgroups/rules
@@ -129,6 +127,10 @@ sidebars:
         label: HBF
     home:
       enabled: true
+      extraItems:
+        - key: tenants
+          label: Tenants
+          link: /openapi-ui/{cluster}/api-table/sgroups.io/v1alpha1/tenants
     workloads:
       enabled: false
     networking:

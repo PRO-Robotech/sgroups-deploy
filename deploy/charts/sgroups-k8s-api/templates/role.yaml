@@ -1,0 +1,35 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "sgroups-k8s-api.fullname" . }}
+  labels:
+    {{- include "sgroups-k8s-api.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: sgroups-k8s-controller-leader-election
+  namespace: sgroups-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: sgroups-k8s-controller-leader-election
+subjects:
+  - kind: ServiceAccount
+    name: sgroups-k8s-controller
+    namespace: sgroups-system

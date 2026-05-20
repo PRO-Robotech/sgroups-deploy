@@ -1,15 +1,15 @@
 fullnameOverride: sgroups-agent
 nameOverride: sgroups-agent
 
+type: Deployment  # DaemonSet
+replicaCount: 2   # Agent replicas count
+
 agent:
   image:
     repository: sgroups-agent
     tag: latest
     pullPolicy: IfNotPresent
   config:
-    hostinfo:
-      name: host-1
-      namespace: sample-local
     extapi:
       svc:
         sgroups:

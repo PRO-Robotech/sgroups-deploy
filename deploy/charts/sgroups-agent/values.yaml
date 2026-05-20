@@ -106,9 +106,10 @@ agent:
   #   readOnly: true
 
   config:
-    hostinfo:
-      name: host-example
-      namespace: "incloud-sgroups"
+    # hostinfo:
+    # dynamicaly set over env variables
+    #   name: host-example            # NFT_HOSTINFO_NAME
+    #   namespace: "incloud-sgroups"  # NFT_HOSTINFO_NAMESPACE
     exit-on-success: false
     graceful-shutdown: 10s
     def-policy-accept: true
@@ -186,15 +187,15 @@ hosthooks:
       apiVersion: sgroups.io/v1alpha1
       kind: Host
       metadata:
-        name: ${NFT_HOSTNAME}
-        namespace: ${NFT_NAMESPACE}
+        name: ${NFT_HOSTINFO_NAME}
+        namespace: ${NFT_HOSTINFO_NAMESPACE}
       spec:
         displayName: SgroupsAgent Test Host
         comment: created by sgroups-agent for testing purposes
         description: Host for smoke tests
       EOF
     preStop: |
-      kubectl -n ${NFT_NAMESPACE} delete hosts.sgroups.io ${NFT_HOSTNAME}
+      kubectl -n ${NFT_HOSTINFO_NAMESPACE} delete hosts.sgroups.io ${NFT_HOSTINFO_NAME}
   resources: {}
 
 # Collector container configuration

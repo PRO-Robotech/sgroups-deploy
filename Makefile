@@ -26,6 +26,7 @@ RBAC_ENGINE_VERSION := 0.1.0-7833907
 IMAGE_BACKEND   := sgroups-backend:latest
 IMAGE_MIGRATION := sgroups-migration:latest
 IMAGE_APISERVER := sgroups-k8s-apiserver:latest
+IMAGE_CONTROLLER := sgroups-k8s-controller:latest
 IMAGE_AGENT     := sgroups-agent:latest
 
 KIND_CLUSTER := sgroups-dev
@@ -36,7 +37,7 @@ CERT_MANAGER_VERSION := v1.17.2
 .PHONY: up down \
         kind-create kind-delete \
         cert-manager \
-        build build-backend build-migration build-apiserver build-agent \
+        build build-backend build-migration build-apiserver build-controller build-agent \
         load \
         deploy undeploy \
         deploy-sgroups deploy-apiserver deploy-agent deploy-incloud-web deploy-incloud-web-rbac deploy-rbac-engine \
@@ -79,7 +80,7 @@ cert-manager:
 
 # ─── Docker build ─────────────────────────────────────────────────
 
-build: build-backend build-migration build-apiserver build-agent
+build: build-backend build-migration build-apiserver build-controller build-agent
 
 build-backend:
 	docker buildx build --load \
@@ -100,6 +101,13 @@ build-apiserver:
 		-t $(IMAGE_APISERVER) \
 		$(PARENT_DIR)/sgroups-k8s-api
 
+build-controller:
+	docker buildx build --load \
+		--build-context sgroups-proto=$(PARENT_DIR)/sgroups-proto \
+		-f $(PARENT_DIR)/sgroups-k8s-api/controller.Dockerfile \
+		-t $(IMAGE_CONTROLLER) \
+		$(PARENT_DIR)/sgroups-k8s-api
+
 build-agent:
 	docker buildx build --load \
 		-f $(PARENT_DIR)/sgroups/Dockerfile.agent \
@@ -112,6 +120,7 @@ load:
 	kind load docker-image $(IMAGE_BACKEND) --name $(KIND_CLUSTER)
 	kind load docker-image $(IMAGE_MIGRATION) --name $(KIND_CLUSTER)
 	kind load docker-image $(IMAGE_APISERVER) --name $(KIND_CLUSTER)
+	kind load docker-image $(IMAGE_CONTROLLER) --name $(KIND_CLUSTER)
 	kind load docker-image $(IMAGE_AGENT) --name $(KIND_CLUSTER)
 
 # ─── Deploy / Undeploy (helm) ─────────────────────────────────────
@@ -189,8 +198,9 @@ redeploy-backend: build-backend
 	kubectl rollout restart deployment/$(SGROUPS_RELEASE) -n $(NAMESPACE)
 	kubectl rollout status deployment/$(SGROUPS_RELEASE) -n $(NAMESPACE) --timeout=180s
 
-redeploy-apiserver: build-apiserver
+redeploy-apiserver: build-apiserver build-controller
 	kind load docker-image $(IMAGE_APISERVER) --name $(KIND_CLUSTER)
+	kind load docker-image $(IMAGE_CONTROLLER) --name $(KIND_CLUSTER)
 	$(MAKE) deploy-apiserver
 	kubectl rollout restart deployment/$(APISERVER_RELEASE) -n $(NAMESPACE)
 	kubectl rollout status deployment/$(APISERVER_RELEASE) -n $(NAMESPACE) --timeout=180s

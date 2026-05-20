@@ -55,6 +55,19 @@ spec:
           args:
             - --config
             - /opt/h-bf/sgroups/client/config.yaml
+          env:
+            - name: NFT_HOSTINFO_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NFT_HOSTINFO_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NFT_HOSTINFO_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
           ports:
             - name: metrics
               containerPort: {{ .Values.service.agent.metrics }}
@@ -87,15 +100,15 @@ spec:
             - "-lc"
             - "echo ready; tail -f /dev/null"
           env:
-            - name: NFT_HOSTNAME
+            - name: NFT_HOSTINFO_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: NFT_NAMESPACE
+            - name: NFT_HOSTINFO_NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: NFT_UID
+            - name: NFT_HOSTINFO_UID
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
@@ -198,6 +211,14 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NFT_HOSTINFO_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NFT_HOSTINFO_NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace

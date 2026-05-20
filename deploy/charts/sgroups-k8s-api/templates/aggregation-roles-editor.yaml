@@ -1,0 +1,26 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "sgroups-k8s-api.fullname" . }}-editor
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+    {{- include "sgroups-k8s-api.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - sgroups.io
+    resources:
+      - addressgroups
+      - hosts
+      - networks
+      - rules
+      - services
+      - tenants
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+      - patch
+      - update

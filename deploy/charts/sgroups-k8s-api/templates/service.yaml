@@ -7,9 +7,13 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ .Values.service.ports.apiserver }}
       targetPort: http
       protocol: TCP
       name: http
+    - port: {{ .Values.service.ports.controller }}
+      targetPort: controller
+      protocol: TCP
+      name: controller
   selector:
     {{- include "sgroups-k8s-api.selectorLabels" . | nindent 4 }}
