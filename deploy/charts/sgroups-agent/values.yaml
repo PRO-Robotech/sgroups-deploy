@@ -163,8 +163,10 @@ agent:
       retries: 5
       retry-timeout: 3s
     telemetry:
+      address: 127.0.0.1:9660
       useragent: "string"
-      endpoint: 0.0.0.0:9660
+      nft-collector:
+        min-frequency: 1s
       metrics:
         enable: true
       healthcheck:
