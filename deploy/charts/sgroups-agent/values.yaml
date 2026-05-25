@@ -163,7 +163,7 @@ agent:
       retries: 5
       retry-timeout: 3s
     telemetry:
-      address: 127.0.0.1:9660
+      address: 0.0.0.0:9660
       useragent: "string"
       nft-collector:
         min-frequency: 1s
