@@ -48,6 +48,7 @@ service:
   type: ClusterIP
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   agent:
+    api: 5000
     metrics: 9660
   collector:
     metrics: 9680
@@ -119,7 +120,7 @@ agent:
       strategy: dns
     extapi:
       svc:
-        def-daial-duration: 10s
+        def-dial-duration: 10s
         sgroups:
           dial-duration: 3s
           address: sgroups:9006
@@ -173,6 +174,20 @@ agent:
         enable: true
       profile:
         enable: true
+    ss:
+      strategy: default # <cached|non-cached> #default=cached
+      cache: # optional; used when strategy=cached
+        ttl: 10s #default=2s
+    api:
+      address: tcp://127.0.0.1:5000 #mandatory; default= tcp://127.0.0.1:5000
+      authn:
+        type: none # <none|tls> # 'none' is by default
+        # tls:
+        #   key-file: "key-file.pem"
+        #   cert-file: "cert-file.pem"
+        #   client:
+        #     verify: oneof<skip|certs-required|verify> #optional; default='skip'
+        #     ca-files: ["file1.pem", "file2.pem", "file3.pem", ...] #CA files when client/verify points to 'verify'
 
 hosthooks:
   enabled: true

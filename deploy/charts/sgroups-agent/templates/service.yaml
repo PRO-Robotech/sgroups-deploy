@@ -7,6 +7,10 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
+    - port: {{ .Values.service.agent.api }}
+      targetPort: api
+      protocol: TCP
+      name: api
     - port: {{ .Values.service.agent.metrics }}
       targetPort: metrics
       protocol: TCP

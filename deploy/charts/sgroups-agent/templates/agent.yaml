@@ -69,6 +69,9 @@ spec:
                 fieldRef:
                   fieldPath: metadata.uid
           ports:
+            - name: api
+              containerPort: {{ .Values.service.agent.api }}
+              protocol: TCP
             - name: metrics
               containerPort: {{ .Values.service.agent.metrics }}
               protocol: TCP
