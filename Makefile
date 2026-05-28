@@ -29,8 +29,9 @@ IMAGE_APISERVER := sgroups-k8s-apiserver:latest
 IMAGE_CONTROLLER := sgroups-k8s-controller:latest
 IMAGE_AGENT     := sgroups-agent:latest
 
-KIND_CLUSTER := sgroups-dev
-NAMESPACE    := sgroups-system
+KIND_CLUSTER 		:= sgroups-dev
+NAMESPACE    		:= sgroups-system
+NAMESPACE_AGENT := sgroups-agent
 
 CERT_MANAGER_VERSION := v1.17.2
 
@@ -147,7 +148,7 @@ deploy-apiserver:
 
 deploy-agent:
 	helm upgrade --install $(AGENT_RELEASE) $(AGENT_CHART) \
-		-n $(NAMESPACE) --create-namespace \
+		-n $(NAMESPACE_AGENT) --create-namespace \
 		-f $(AGENT_VALUES) \
 		--wait --timeout 180s
 	@echo "✓ sgroups-agent deployed."
