@@ -175,7 +175,7 @@ agent:
       profile:
         enable: true
     ss:
-      strategy: default # <cached|non-cached> #default=cached
+      strategy: cached # <cached|non-cached> #default=cached
       cache: # optional; used when strategy=cached
         ttl: 10s #default=2s
     api:
