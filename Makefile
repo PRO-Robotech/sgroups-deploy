@@ -31,7 +31,7 @@ IMAGE_AGENT     := sgroups-agent:latest
 
 KIND_CLUSTER 		:= sgroups-dev
 NAMESPACE    		:= sgroups-system
-NAMESPACE_AGENT := sgroups-agent
+NAMESPACE_AGENT := incloud-agent
 
 CERT_MANAGER_VERSION := v1.17.2
 
