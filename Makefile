@@ -179,7 +179,7 @@ undeploy-apiserver:
 	-helm uninstall $(APISERVER_RELEASE) -n $(NAMESPACE)
 
 undeploy-agent:
-	-helm uninstall $(AGENT_RELEASE) -n $(NAMESPACE)
+	-helm uninstall $(AGENT_RELEASE) -n $(NAMESPACE_AGENT)
 
 undeploy-incloud-web:
 	-helm uninstall $(INCLOUD_WEB_RELEASE) -n $(NAMESPACE)
@@ -209,8 +209,8 @@ redeploy-apiserver: build-apiserver build-controller
 redeploy-agent: build-agent
 	kind load docker-image $(IMAGE_AGENT) --name $(KIND_CLUSTER)
 	$(MAKE) deploy-agent
-	kubectl rollout restart daemonset/$(AGENT_RELEASE) -n $(NAMESPACE)
-	kubectl rollout status daemonset/$(AGENT_RELEASE) -n $(NAMESPACE) --timeout=180s
+	kubectl rollout restart deployment/$(AGENT_RELEASE) -n $(NAMESPACE_AGENT)
+	kubectl rollout status deployment/$(AGENT_RELEASE) -n $(NAMESPACE_AGENT) --timeout=180s
 
 redeploy-rbac-engine: build-rbac-engine
 	kind load docker-image $(IMAGE_RBAC_ENGINE) --name $(KIND_CLUSTER)
@@ -230,7 +230,7 @@ logs-apiserver:
 	kubectl logs -f deployment/$(APISERVER_RELEASE) -n $(NAMESPACE)
 
 logs-agent:
-	kubectl logs -f daemonset/$(AGENT_RELEASE) -n $(NAMESPACE) -c agent
+	kubectl logs -f daemonset/$(AGENT_RELEASE) -n $(NAMESPACE_AGENT) -c agent
 
 logs-incloud-web:
 	kubectl logs -f deployment/$(INCLOUD_WEB_RELEASE) -n $(NAMESPACE)
